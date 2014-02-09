@@ -6,6 +6,7 @@ class Dummy {
 
 def myList = [1,2,3]
 println "hello"
+println "mama"
 
 
 
