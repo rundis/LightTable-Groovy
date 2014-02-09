@@ -4,9 +4,9 @@ At the moment it is very very rudementary, but the plan is to grow it into a fea
 
 ## Installation
 Currently you can install it by cloning the repo into your Light Table plugin directory.
-   ```bash
-        $ cd /path/to/config/LightTable/plugins && git clone git@github.com:rundis/LightTable-Groovy.git
-    ```
+```bash
+  $ cd /path/to/config/LightTable/plugins && git clone git@github.com:rundis/LightTable-Groovy.git
+```
 
 
 ## Requirements
