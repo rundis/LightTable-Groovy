@@ -5,4 +5,7 @@ class Dummy {
 
 
 def myList = [1,2,3]
-println "Hello"
+println "hello"
+
+
+
