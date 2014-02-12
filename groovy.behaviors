@@ -1,6 +1,7 @@
 {:+ {:app [(:lt.objs.plugins/load-js ["codemirror/groovy.js", "groovy_compiled.js"])]
      :editor.groovy [:lt.plugins.groovy/on-eval
-                     :lt.plugins.groovy/on-eval.one]
+                     :lt.plugins.groovy/on-eval.one
+                     :it.plugins.groovy/groovy-result]
      :files [(:lt.objs.files/file-types
               [{:name "Groovy" :exts [:groovy] :mime "text/x-groovy" :tags [:editor.groovy]}]
               )]

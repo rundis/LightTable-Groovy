@@ -3,7 +3,7 @@ import groovy.json.*
 
 
 
-logFile = new File("server.log")
+  logFile = new File("server.log")
 
 def log(msg) {
   logFile << "${new Date().format('dd.MM.yyyy mm:hh:sss')} - $msg\n"
@@ -25,12 +25,15 @@ log "Connected"
 
 
 
-def notifyClient(data) {
+def sendData(data) {
+  json = new JsonBuilder(data).toString() + "\n"
+  log "Sender json til LT: $json"
+
   client << new JsonBuilder(data).toString() + "\n"
 }
 
 
-notifyClient (
+sendData (
   [
     name: "Groovy",
     "client-id": args[1].toInteger(),
@@ -47,19 +50,49 @@ log "notified client !"
 println "Connected" // tells lighttable we're good
 
 
+//binding = new Binding();
+//shell = new GroovyShell(binding)
+
+
 client.withStreams {input, output ->
   while(true) {
     try {
       input.eachLine {line ->
         log "A Line! : $line"
 
-        if(line.contains("client.close")) {
+        data = new JsonSlurper().parseText(line)
+
+
+        if(data[1] == "client.close") {
           log "Bye bye !"
 
           try {
             client.close()
           } catch (Exception e) { log "Failed to close client connection, will exit anyway: $e" }
           System.exit(0)
+        } else {
+
+
+          try {
+            log "Skal til aa evaluere kode naa"
+            log "The shit: ${data[2].code}"
+            log "The shit: ${data[2].code.getClass()}"
+
+
+            log "Ready to do it"
+            result = "hello" //shell.evaluate(data[2].code)
+            log("Code evaluated ok. Result: $result")
+            sendData(
+              [args[1].toInteger(), "editor.eval.groovy.result", [result: result, meta: data[2].meta]]
+            )
+
+
+
+          } catch (Exception e) {
+            log "Exception when evaluating: $e"
+
+          }
+
         }
 
       }
@@ -67,33 +100,10 @@ client.withStreams {input, output ->
       log "Error reading from socket inputstream: $e"
     }
   }
-
 }
 
 
 
+log "End of the world, should not get here really..."
 
-log "Wtf How did we get here..."
-
-
-
-
-
-
-
-/*def findFreePort() {
-ServerSocket socket = null;
-try {
-socket = new ServerSocket(0)
-socket.setReuseAddress(true)
-int port = socket.getLocalPort()
-socket.close();
-return port
-} finally {
-if (socket != null) {
-socket.close();
-}
-}
-throw new IllegalStateException("Could not find a free TCP/IP port to for Lighttable groovy server");
-}*/
 

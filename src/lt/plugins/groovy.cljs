@@ -202,15 +202,19 @@
                                                                  :origin origin
                                                                  :info info
                                                                  :create try-connect})
-                                              :editor.eval.ruby
+                                              :editor.eval.groovy
                                               info
                                               :only
                                               origin))))
 
-;; (behavior ::eval!
-;;           :triggers #{:eval!}
-;;           :reaction (fn [this event]
-;;                       (let [{:keys [info origin]} event]
-;;                         (notifos/working "")
-;;                         (eval-groovy info)
-;;                         (notifos/done-working))))
+
+
+(behavior ::groovy-result
+                  :triggers #{:editor.eval.groovy.result}
+                  :reaction (fn [editor res]
+                              (notifos/done-working)
+                              (.log js/console (str "Groovy result !"))
+                              (object/raise editor :editor.result (:result res) {:line (:end (:meta res))
+                                                                                 :start-line (-> res :meta :start)})))
+
+
