@@ -10,13 +10,143 @@
             [lt.objs.notifos :as notifos]
             [lt.plugins.watches :as watches]
             [lt.objs.editor :as ed]
-            )
+            [lt.util.load :as load]
+            [lt.objs.files :as files]
+            [lt.objs.plugins :as plugins]
+            [lt.objs.clients :as clients]
+            [lt.objs.clients.tcp :as tcp]
+            [lt.objs.popup :as popup]
+            [lt.objs.eval :as eval])
   (:require-macros [lt.macros :refer [behavior]]))
+
+(def shell (load/node-module "shelljs"))
+(def plugin-dir (plugins/find-plugin "Groovy"))
+(def binary-path (files/join plugin-dir "./run-server.sh"))
+(def server-path (files/join plugin-dir "groovy-src/LTServer.groovy"))
+
+
+
+
+
+
+(behavior ::on-out
+          :triggers #{:proc.out}
+          :reaction (fn [this data]
+                      (let [out (.toString data)]
+                        (object/update! this [:buffer] str out)
+                        (if (> (.indexOf out "Connected") -1)
+                          (do
+                            (notifos/done-working)
+                            (object/merge! this {:connected true}))
+                          (object/update! this [:buffer] str data)))))
+
+(behavior ::on-error
+          :triggers #{:proc.error}
+          :reaction (fn [this data]
+                      (let [out (.toString data)]
+                        (when-not (> (.indexOf (:buffer @this) "Connected") -1)
+                          (object/update! this [:buffer] str data)
+                          ))
+                      ))
+
+(behavior ::on-exit
+          :triggers #{:proc.exit}
+          :reaction (fn [this data]
+                      ;(object/update! this [:buffer] str data)
+                      (when-not (:connected @this)
+                        (notifos/done-working)
+                        (popup/popup! {:header "We couldn't connect."
+                                       :body [:span "Looks like there was an issue trying to connect
+                                              to the project. Here's what we got:" [:pre (:buffer @this)]]
+                                       :buttons [{:label "close"}]})
+                        (clients/rem! (:client @this)))
+                      (proc/kill-all (:procs @this))
+                      (object/destroy! this)
+                      ))
+
+(object/object* ::connecting-notifier
+                :triggers []
+                :behaviors [::on-exit ::on-error ::on-out]
+                :init (fn [this client]
+                        (object/merge! this {:client client :buffer ""})
+                        nil))
+
+
+(defn run-groovy[{:keys [path name client] :as info}]
+  (let [obj (object/create ::connecting-notifier info)
+        client-id (clients/->id client)
+        project-dir (files/parent path)]
+    (object/merge! client {:port tcp/port
+                           :proc obj})
+    (notifos/working "Connecting..")
+    (proc/exec {:command binary-path
+                :args [tcp/port client-id project-dir]
+                :cwd plugin-dir
+                :env {"GROOVY_PATH" (files/join (files/parent path))}
+                :obj obj})))
+
+(defn check-groovy[obj]
+  (assoc obj :groovy (or (::groovy-exe @groovy)
+                         (.which shell "groovy"))))
+
+(defn check-server[obj]
+  (assoc obj :groovy-server (files/exists? server-path)))
+
+(defn handle-no-groovy [client]
+  (clients/rem! client)
+  (notifos/done-working)
+  (popup/popup! {:header "We couldn't find Groovy."
+                 :body "In order to evaluate in Groovy files, Groovy must be installed and on your system PATH."
+                 :buttons [{:label "Download Groovy"
+                            :action (fn []
+                                      (platform/open "http://gvmtool.net/"))}
+                           {:label "ok"}]}))
+
+(defn notify [obj]
+  (let [{:keys [groovy path groovy-server client]} obj]
+    (cond
+     (or (not groovy) (empty? groovy)) (do (handle-no-groovy client))
+     :else (run-groovy obj))
+    obj))
+
+(defn check-all [obj]
+  (-> obj
+      (check-groovy)
+      (check-server)
+      (notify)))
+
+(defn try-connect [{:keys [info]}]
+  (.log js/console (str "try connect" info))
+  (let [path (:path info)
+        client (clients/client! :groovy.client)]
+    (check-all {:path path
+                :client client})
+    client))
+
+(behavior ::connect
+          :triggers #{:connect}
+          :reaction (fn [this path]
+                      (.log js/console (str "behavior connect : " path))
+                      (try-connect {:info {:path path}})))
+
+
 
 (object/object* ::groovy-lang
                 :tags #{:groovy.lang})
 
+
 (def groovy (object/create ::groovy-lang))
+
+(scl/add-connector {:name "Groovy"
+                    :desc "Select a directory to serve as the root of your groovy project... then again it might not be relevant..."
+                    :connect (fn []
+                               (dialogs/dir groovy :connect))})
+(behavior ::connect
+                  :triggers #{:connect}
+                  :reaction (fn [this path]
+                              (try-connect {:info {:path path}})))
+
+
 
 
 (defn display-results [err stdout stderr]
@@ -34,7 +164,6 @@
 (defn groovy-watch [meta src]
   (let [meta-str (str "%q(" (js/JSON.stringify (clj->js meta)) ")")]
     (str "LtWatch.watch(" src ", JSON.parse(" meta-str "))")))
-
 
 
 (behavior ::on-eval
@@ -62,11 +191,26 @@
                                                      :info info}))))
 
 
-
 (behavior ::eval!
-          :triggers #{:eval!}
-          :reaction (fn [this event]
-                      (let [{:keys [info origin]} event]
-                        (notifos/working "")
-                        (eval-groovy info)
-                        (notifos/done-working))))
+                  :triggers #{:eval!}
+                  :reaction (fn [this event]
+                              (.log js/console (str "Eval !"))
+                              (let [{:keys [info origin]} event
+                                    client (-> @origin :client :default)]
+                                (notifos/working "")
+                                (clients/send (eval/get-client! {:command :editor.eval.groovy
+                                                                 :origin origin
+                                                                 :info info
+                                                                 :create try-connect})
+                                              :editor.eval.ruby
+                                              info
+                                              :only
+                                              origin))))
+
+;; (behavior ::eval!
+;;           :triggers #{:eval!}
+;;           :reaction (fn [this event]
+;;                       (let [{:keys [info origin]} event]
+;;                         (notifos/working "")
+;;                         (eval-groovy info)
+;;                         (notifos/done-working))))
