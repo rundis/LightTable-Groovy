@@ -149,17 +149,6 @@
 
 
 
-(defn display-results [err stdout stderr]
-  (.log js/console (str "Results:\n" stdout stderr)))
-
-
-(defn escape-code [code]
-  (clojure.string/replace code "\"" "'"))
-
-(defn eval-groovy [info]
-  (.log js/console (str "eval-groovy for : " (:path info)))
-  (.exec (js/require "child_process") (str "groovy -e \"" (escape-code (:code info)) "\"") display-results))
-
 
 (defn groovy-watch [meta src]
   (let [meta-str (str "%q(" (js/JSON.stringify (clj->js meta)) ")")]
@@ -209,6 +198,7 @@
 
 
 
+
 (behavior ::groovy-result
                   :triggers #{:editor.eval.groovy.result}
                   :reaction (fn [editor res]
@@ -217,4 +207,10 @@
                               (object/raise editor :editor.result (:result res) {:line (:end (:meta res))
                                                                                  :start-line (-> res :meta :start)})))
 
-
+(behavior ::groovy-success
+                  :triggers #{:editor.eval.groovy.success}
+                  :reaction (fn [editor res]
+                              (notifos/done-working)
+                              (.log js/console (str "Groovy success !"))
+                              (object/raise editor :editor.result "✓" {:line (-> res :meta :end)
+                                                                       :start-line (-> res :meta :start)})))
