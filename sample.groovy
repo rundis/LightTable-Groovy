@@ -4,6 +4,7 @@ class Dummy {
 }
 
 
-def myList = [1,2,3]
+def myList = [1,2,3].collect {it*2}
+
 println "hello"
 println "mama"

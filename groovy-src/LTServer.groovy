@@ -67,12 +67,21 @@ client.withStreams {input, output ->
           case "editor.eval.groovy":
             evalResult = ScriptExecutor.execute(data.code)
             log "Eval results: $evalResult"
+            data = [currentClientId?.toInteger(), "editor.eval.groovy.result", [result: evalResult.result, meta: data.meta]]
+            w = new PrintWriter( output )
+            json = new JsonBuilder(data).toString() + "\n"
+            log "Sender json til LT: $json"
+            w << json
+            w.flush()
+
             /*sendData(
               [currentClientId?.toInteger(), "editor.eval.groovy.result", [result: evalResult.result, meta: data.meta]]
             )*/
-            sendData(
-              [currentClientId?.toInteger(), "editor.eval.groovy.success", [meta: data.meta]]
-            )
+            /*sendData(
+              [currentClientId, "editor.eval.groovy.success", [meta: data.meta]]
+            )*/
+            //sendData ([currentClientId, "some.event"])
+
             break
           default:
             log "Invalid command: $command"

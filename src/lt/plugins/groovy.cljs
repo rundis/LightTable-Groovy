@@ -1,5 +1,5 @@
 (ns lt.plugins.groovy
-  (:require [lt.objs.editor :as editor]
+  (:require [lt.objs.editor :as ed]
             [lt.objs.editor.pool :as pool]
             [lt.objs.command :as cmd]
             [lt.objs.proc :as proc]
@@ -9,24 +9,21 @@
             [lt.objs.console :as console]
             [lt.objs.notifos :as notifos]
             [lt.plugins.watches :as watches]
-            [lt.objs.editor :as ed]
             [lt.util.load :as load]
             [lt.objs.files :as files]
             [lt.objs.plugins :as plugins]
             [lt.objs.clients :as clients]
             [lt.objs.clients.tcp :as tcp]
             [lt.objs.popup :as popup]
-            [lt.objs.eval :as eval])
+            [lt.objs.eval :as eval]
+            [lt.objs.platform :as platform]
+            [lt.util.cljs :refer [js->clj]])
   (:require-macros [lt.macros :refer [behavior]]))
 
 (def shell (load/node-module "shelljs"))
 (def plugin-dir (plugins/find-plugin "Groovy"))
 (def binary-path (files/join plugin-dir "./run-server.sh"))
 (def server-path (files/join plugin-dir "groovy-src/LTServer.groovy"))
-
-
-
-
 
 
 (behavior ::on-out
@@ -183,10 +180,10 @@
 (behavior ::eval!
                   :triggers #{:eval!}
                   :reaction (fn [this event]
-                              (.log js/console (str "Eval !"))
+                              (.log js/console "Eval !")
                               (let [{:keys [info origin]} event
                                     client (-> @origin :client :default)]
-                                (notifos/working "")
+                                (notifos/working "Evaluating groovy...")
                                 (clients/send (eval/get-client! {:command :editor.eval.groovy
                                                                  :origin origin
                                                                  :info info
@@ -198,12 +195,11 @@
 
 
 
-
 (behavior ::groovy-result
                   :triggers #{:editor.eval.groovy.result}
                   :reaction (fn [editor res]
                               (notifos/done-working)
-                              (.log js/console (str "Groovy result !"))
+                              (.log js/console "Groovy result !")
                               (object/raise editor :editor.result (:result res) {:line (:end (:meta res))
                                                                                  :start-line (-> res :meta :start)})))
 
@@ -211,6 +207,20 @@
                   :triggers #{:editor.eval.groovy.success}
                   :reaction (fn [editor res]
                               (notifos/done-working)
-                              (.log js/console (str "Groovy success !"))
+                              (.log js/console "Groovy success !")
                               (object/raise editor :editor.result "✓" {:line (-> res :meta :end)
                                                                        :start-line (-> res :meta :start)})))
+(behavior ::some-event
+          :triggers #{:some.event}
+          :reaction (fn [this event]
+                      (.log js/console "Some event triggered. Hooray !")
+                      (println "Some event behavior...")))
+
+(cmd/command {:command :some-command
+              :desc "Command to verify some-event behavior"
+              :exec (fn []
+                      (print "hello")
+                      (when-let [editor (pool/last-active)]
+                        (println "Raise some event on ed")
+                        (println (ed/last-line editor))
+                        (object/raise editor :some.event)))})

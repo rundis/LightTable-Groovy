@@ -1,10 +1,11 @@
 {:+ {:app [(:lt.objs.plugins/load-js ["codemirror/groovy.js", "groovy_compiled.js"])]
+     :clients []
      :editor.groovy [:lt.plugins.groovy/on-eval
                      :lt.plugins.groovy/on-eval.one
                      :it.plugins.groovy/groovy-result
                      :it.plugins.groovy/groovy-success
+                     :it.plugins.groovy/some-event
                      [:lt.object/add-tag :watchable]]
      :files [(:lt.objs.files/file-types
-              [{:name "Groovy" :exts [:groovy] :mime "text/x-groovy" :tags [:editor.groovy]}]
-              )]
+              [{:name "Groovy" :exts [:groovy] :mime "text/x-groovy" :tags [:editor.groovy]}])]
      :groovy.lang [:lt.plugins.groovy/eval! :lt.plugins.groovy/connect]}}
