@@ -120,13 +120,6 @@
                 :client client})
     client))
 
-(behavior ::connect
-          :triggers #{:connect}
-          :reaction (fn [this path]
-                      (.log js/console (str "behavior connect : " path))
-                      (try-connect {:info {:path path}})))
-
-
 
 (object/object* ::groovy-lang
                 :tags #{:groovy.lang})
@@ -213,14 +206,12 @@
 (behavior ::some-event
           :triggers #{:some.event}
           :reaction (fn [this event]
-                      (.log js/console "Some event triggered. Hooray !")
                       (println "Some event behavior...")))
 
 (cmd/command {:command :some-command
               :desc "Command to verify some-event behavior"
               :exec (fn []
-                      (print "hello")
-                      (when-let [editor (pool/last-active)]
+                      (print "hello there from some command")
+                      (when-let [editor (first (object/by-tag :editor.groovy))]
                         (println "Raise some event on ed")
-                        (println (ed/last-line editor))
                         (object/raise editor :some.event)))})

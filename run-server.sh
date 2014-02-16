@@ -4,4 +4,5 @@
 # run_server.sh <lt_port> <lt_client_id>
 
 
-groovy groovy-src/LTServer.groovy $@
+cd groovy-src
+groovy LTServer.groovy $@
