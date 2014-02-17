@@ -69,6 +69,11 @@
                         nil))
 
 
+(defn groovy-watch [meta src]
+  (let [meta-str (str "%q(" (js/JSON.stringify (clj->js meta)) ")")]
+    (str "LtWatch.watch(" src ", JSON.parse(" meta-str "))")))
+
+
 (defn run-groovy[{:keys [path name client] :as info}]
   (let [obj (object/create ::connecting-notifier info)
         client-id (clients/->id client)
@@ -113,36 +118,12 @@
       (notify)))
 
 (defn try-connect [{:keys [info]}]
-  (.log js/console (str "try connect" info))
   (let [path (:path info)
         client (clients/client! :groovy.client)]
     (check-all {:path path
                 :client client})
     client))
 
-
-(object/object* ::groovy-lang
-                :tags #{:groovy.lang})
-
-
-(def groovy (object/create ::groovy-lang))
-
-(scl/add-connector {:name "Groovy"
-                    :desc "Select a directory to serve as the root of your groovy project... then again it might not be relevant..."
-                    :connect (fn []
-                               (dialogs/dir groovy :connect))})
-(behavior ::connect
-                  :triggers #{:connect}
-                  :reaction (fn [this path]
-                              (try-connect {:info {:path path}})))
-
-
-
-
-
-(defn groovy-watch [meta src]
-  (let [meta-str (str "%q(" (js/JSON.stringify (clj->js meta)) ")")]
-    (str "LtWatch.watch(" src ", JSON.parse(" meta-str "))")))
 
 
 (behavior ::on-eval
@@ -173,7 +154,6 @@
 (behavior ::eval!
                   :triggers #{:eval!}
                   :reaction (fn [this event]
-                              (.log js/console "Eval !")
                               (let [{:keys [info origin]} event
                                     client (-> @origin :client :default)]
                                 (notifos/working "Evaluating groovy...")
@@ -188,30 +168,50 @@
 
 
 
-(behavior ::groovy-result
-                  :triggers #{:editor.eval.groovy.result}
-                  :reaction (fn [editor res]
-                              (notifos/done-working)
-                              (.log js/console "Groovy result !")
-                              (object/raise editor :editor.result (:result res) {:line (:end (:meta res))
+(behavior ::groovy-res
+          :triggers #{:groovy.res}
+          :reaction (fn [editor res]
+                      (notifos/done-working)
+                      (when-let [o (:out res)] (.log js/console o))
+                      (object/raise editor :editor.result (:result res) {:line (:end (:meta res))
                                                                                  :start-line (-> res :meta :start)})))
 
-(behavior ::groovy-success
-                  :triggers #{:editor.eval.groovy.success}
+
+(behavior ::groovy-ok
+                  :triggers #{:groovy.ok}
                   :reaction (fn [editor res]
                               (notifos/done-working)
-                              (.log js/console "Groovy success !")
+                              (.log js/console "Groovy fine")
+                              (when-let [o (:out res)] (.log js/console o))
                               (object/raise editor :editor.result "✓" {:line (-> res :meta :end)
                                                                        :start-line (-> res :meta :start)})))
-(behavior ::some-event
-          :triggers #{:some.event}
-          :reaction (fn [this event]
-                      (println "Some event behavior...")))
 
-(cmd/command {:command :some-command
-              :desc "Command to verify some-event behavior"
-              :exec (fn []
-                      (print "hello there from some command")
-                      (when-let [editor (first (object/by-tag :editor.groovy))]
-                        (println "Raise some event on ed")
-                        (object/raise editor :some.event)))})
+
+(behavior ::groovy-err
+                  :triggers #{:groovy.err}
+                  :reaction (fn [editor res]
+                              (notifos/done-working)
+                              (when-let [o (:out res)] (.log js/console o))
+                              (object/raise editor :editor.exception (:ex res) {:line (-> res :meta :end)
+                                                                               :start-line (-> res :meta :start)})))
+
+
+
+(behavior ::connect
+                  :triggers #{:connect}
+                  :reaction (fn [this path]
+                              (try-connect {:info {:path path}})))
+
+
+
+(object/object* ::groovy-lang
+                :tags #{:groovy.lang})
+
+
+(def groovy (object/create ::groovy-lang))
+
+(scl/add-connector {:name "Groovy"
+                    :desc "Select a directory to serve as the root of your groovy project... then again it might not be relevant..."
+                    :connect (fn []
+                               (dialogs/dir groovy :connect))})
+

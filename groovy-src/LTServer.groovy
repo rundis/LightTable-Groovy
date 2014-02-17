@@ -67,7 +67,20 @@ client.withStreams {input, output ->
           case "editor.eval.groovy":
             evalResult = ScriptExecutor.execute(data.code)
             log "Eval results: $evalResult"
-            data = [currentClientId?.toInteger(), "editor.eval.groovy.result", [result: evalResult.result, meta: data.meta]]
+
+
+            resultParams = [meta: data.meta]
+            if(evalResult.outputText) { resultParams << [out: evalResult.outputText] }
+
+            if(evalResult.result) {
+              data = [currentClientId?.toInteger(), "groovy.res", [result: evalResult.result] + resultParams]
+            } else if(evalResult.stackTrace) {
+              data = [currentClientId?.toInteger(), "groovy.err", [ex: evalResult.stackTrace] + resultParams]
+            } else {
+              data = [currentClientId?.toInteger(), "groovy.ok", resultParams]
+            }
+
+
             w = new PrintWriter( output )
             json = new JsonBuilder(data).toString() + "\n"
             log "Sender json til LT: $json"
