@@ -176,17 +176,6 @@
                       (object/raise editor :editor.result (:result res) {:line (:end (:meta res))
                                                                                  :start-line (-> res :meta :start)})))
 
-
-(behavior ::groovy-ok
-                  :triggers #{:groovy.ok}
-                  :reaction (fn [editor res]
-                              (notifos/done-working)
-                              (.log js/console "Groovy fine")
-                              (when-let [o (:out res)] (.log js/console o))
-                              (object/raise editor :editor.result "✓" {:line (-> res :meta :end)
-                                                                       :start-line (-> res :meta :start)})))
-
-
 (behavior ::groovy-err
                   :triggers #{:groovy.err}
                   :reaction (fn [editor res]

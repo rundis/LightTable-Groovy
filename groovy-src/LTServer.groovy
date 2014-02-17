@@ -72,12 +72,10 @@ client.withStreams {input, output ->
             resultParams = [meta: data.meta]
             if(evalResult.outputText) { resultParams << [out: evalResult.outputText] }
 
-            if(evalResult.result) {
-              data = [currentClientId?.toInteger(), "groovy.res", [result: evalResult.result] + resultParams]
-            } else if(evalResult.stackTrace) {
-              data = [currentClientId?.toInteger(), "groovy.err", [ex: evalResult.stackTrace] + resultParams]
+            if(!evalResult.stackTrace) {
+              data = [currentClientId?.toInteger(), "groovy.res", [result: evalResult.result?:"null"] + resultParams]
             } else {
-              data = [currentClientId?.toInteger(), "groovy.ok", resultParams]
+              data = [currentClientId?.toInteger(), "groovy.err", [ex: evalResult.stackTrace] + resultParams]
             }
 
 
@@ -86,14 +84,6 @@ client.withStreams {input, output ->
             log "Sender json til LT: $json"
             w << json
             w.flush()
-
-            /*sendData(
-              [currentClientId?.toInteger(), "editor.eval.groovy.result", [result: evalResult.result, meta: data.meta]]
-            )*/
-            /*sendData(
-              [currentClientId, "editor.eval.groovy.success", [meta: data.meta]]
-            )*/
-            //sendData ([currentClientId, "some.event"])
 
             break
           default:

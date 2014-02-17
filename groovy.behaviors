@@ -2,7 +2,6 @@
      :clients []
      :editor.groovy [:lt.plugins.groovy/on-eval
                      :lt.plugins.groovy/on-eval.one
-                     :it.plugins.groovy/groovy-ok
                      :lt.plugins.groovy/groovy-res
                      :lt.plugins.groovy/groovy-err
                      [:lt.object/add-tag :watchable]]
