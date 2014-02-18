@@ -3,7 +3,10 @@ This plugin aims to provide [Groovy](http://groovy.codehaus.org/) suppert for th
 At the moment it is very very rudementary. The short term plan is to grow it into a feasible groovy console/groovy shell alternative with some unique features enabled by the Light Table platform. A long term plan would be to slowly grow it into a feasible Groovy IDE alternative.
 
 ## Installation
-Currently you can install it by cloning the repo into your Light Table plugin directory.
+
+The plugin is available from the Light Table plugin manager under the name Groovy.
+
+If you wish to submit pull request. Just fork this repo and install the plugin by cloning the repo into your Light Table plugin directory.
 ```bash
   $ cd /path/to/config/LightTable/plugins && git clone git@github.com:rundis/LightTable-Groovy.git
 ```
@@ -32,3 +35,8 @@ Output is written to: ```$groovy-plugin-dir$/groovy-src/lt_groovy.log```
 
 ## Version history
 * 0.0.1 Support for simple syntax highligting and evaluation of groovy scripts with inline results.
+
+
+### License
+
+GPLv3 license, same as [Light Table](https://github.com/LightTable/LightTable). See LICENSE.md for the full text.
