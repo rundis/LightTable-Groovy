@@ -84,7 +84,7 @@
     (proc/exec {:command binary-path
                 :args [tcp/port client-id project-dir]
                 :cwd plugin-dir
-                :env {"GROOVY_PATH" (files/join (files/parent path))}
+                :env {:LT_GROOVY_LOG (::enable-client-logging? @groovy)}
                 :obj obj})))
 
 (defn check-groovy[obj]
@@ -127,6 +127,7 @@
 
 
 (behavior ::on-eval
+          :desc "Groovy: Eval current editor"
           :triggers #{:eval}
           :reaction (fn [editor]
                       (object/raise groovy :eval! {:origin editor
@@ -134,6 +135,7 @@
                                                            :code (watches/watched-range editor nil nil groovy-watch)
                                                            :meta {:start 0, :end (ed/last-line editor)})})))
 (behavior ::on-eval.one
+          :desc "Groovy: Eval current selection"
           :triggers #{:eval.one}
           :reaction (fn [editor]
                       (let [pos (ed/->cursor editor)
@@ -152,19 +154,19 @@
 
 
 (behavior ::eval!
-                  :triggers #{:eval!}
-                  :reaction (fn [this event]
-                              (let [{:keys [info origin]} event
-                                    client (-> @origin :client :default)]
-                                (notifos/working "Evaluating groovy...")
-                                (clients/send (eval/get-client! {:command :editor.eval.groovy
-                                                                 :origin origin
-                                                                 :info info
-                                                                 :create try-connect})
-                                              :editor.eval.groovy
-                                              info
-                                              :only
-                                              origin))))
+          :triggers #{:eval!}
+          :reaction (fn [this event]
+                      (let [{:keys [info origin]} event
+                            client (-> @origin :client :default)]
+                        (notifos/working "Evaluating groovy...")
+                        (clients/send (eval/get-client! {:command :editor.eval.groovy
+                                                         :origin origin
+                                                         :info info
+                                                         :create try-connect})
+                                      :editor.eval.groovy
+                                      info
+                                      :only
+                                      origin))))
 
 
 
@@ -173,24 +175,31 @@
           :reaction (fn [editor res]
                       (notifos/done-working)
                       (when-let [o (:out res)] (.log js/console o))
-                      (object/raise editor :editor.result (:result res) {:line (:end (:meta res))
-                                                                                 :start-line (-> res :meta :start)})))
+                      (object/raise editor :editor.result (str (:result res) "\n" (:bindings res)) {:line (:end (:meta res))
+                                                                         :start-line (-> res :meta :start)})))
 
 (behavior ::groovy-err
-                  :triggers #{:groovy.err}
-                  :reaction (fn [editor res]
-                              (notifos/done-working)
-                              (when-let [o (:out res)] (.log js/console o))
-                              (object/raise editor :editor.exception (:ex res) {:line (-> res :meta :end)
-                                                                               :start-line (-> res :meta :start)})))
+          :triggers #{:groovy.err}
+          :reaction (fn [editor res]
+                      (notifos/done-working)
+                      (when-let [o (:out res)] (.log js/console o))
+                      (object/raise editor :editor.exception (:ex res) {:line (-> res :meta :end)
+                                                                        :start-line (-> res :meta :start)})))
 
 
 
 (behavior ::connect
-                  :triggers #{:connect}
-                  :reaction (fn [this path]
-                              (try-connect {:info {:path path}})))
+          :triggers #{:connect}
+          :reaction (fn [this path]
+                      (try-connect {:info {:path path}})))
 
+(behavior ::client-enable-logging
+            :triggers #{:object.instant}
+            :desc "Groovy: Log groovy client output to lt_groovy.log"
+            :type :user
+            :exclusive true
+            :reaction (fn [this]
+                        (object/merge! groovy {::enable-client-logging? true})))
 
 
 (object/object* ::groovy-lang
@@ -200,7 +209,7 @@
 (def groovy (object/create ::groovy-lang))
 
 (scl/add-connector {:name "Groovy"
-                    :desc "Select a directory to serve as the root of your groovy project... then again it might not be relevant..."
+                    :desc "Select a directory to serve as the root of your groovy project. (Currently not in use!)"
                     :connect (fn []
                                (dialogs/dir groovy :connect))})
 

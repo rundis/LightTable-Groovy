@@ -1,19 +1,19 @@
 import groovy.json.*
 
 
-params = [
-  ltPort:   args[0].toInteger(),
-  clientId: args[1].toInteger()
-]
+  params = [
+    ltPort:   args[0].toInteger(),
+    clientId: args[1].toInteger()
+  ]
 
-logFile = new File("server.log")
+
+loggingEnabled = System.getenv()["LT_GROOVY_LOG"]?.toBoolean()?: false
+logFile = new File("lt_groovy.log")
 
 def log(msg) {
-  logFile << "${new Date().format('dd.MM.yyyy mm:hh:sss')} - $msg\n"
+  if(loggingEnabled) { logFile << "${new Date().format('dd.MM.yyyy HH:mm sss')} - $msg\n" }
 }
-
-log("Test : " + ScriptExecutor.execute("println 'hello'"))
-log "New connection"
+log "New connection. Args: $args"
 
 client = null
 try {
@@ -26,12 +26,10 @@ try {
 log "Connected"
 
 
-
 def sendData(data) {
   json = new JsonBuilder(data).toString() + "\n"
-  log "Sender json til LT: $json"
-
-  client << new JsonBuilder(data).toString() + "\n"
+  log "Sending json to LT: $json"
+  client << json
 }
 
 
@@ -49,61 +47,50 @@ println "Connected" // tells lighttable we're good
 
 
 client.withStreams {input, output ->
-  while(true) {
-    try {
-      input.eachLine {line ->
-        log "A Line! : $line"
+  try {
+    input.eachLine {line ->
+      log "A command : $line"
 
-        (currentClientId, command, data) = new JsonSlurper().parseText(line)
+      (currentClientId, command, data) = new JsonSlurper().parseText(line)
 
-        switch (command) {
-          case "client.close":
-            log "Bye bye !"
-            try {
-              client.close()
-            } catch (Exception e) { log "Failed to close client connection, will exit anyway: $e" }
-            System.exit(0)
-            break
-          case "editor.eval.groovy":
-            evalResult = ScriptExecutor.execute(data.code)
-            log "Eval results: $evalResult"
+      switch (command) {
+        case "client.close":
+          log "Bye bye !"
+          try {
+            client.close()
+          } catch (Exception e) { log "Failed to close client connection, will exit anyway: $e" }
+          System.exit(0)
+          break
 
+        case "editor.eval.groovy":
+          evalResult = ScriptExecutor.execute(data.code)
+          log "Eval results: $evalResult"
 
-            resultParams = [meta: data.meta]
-            if(evalResult.outputText) { resultParams << [out: evalResult.outputText] }
+          resultParams = [meta: data.meta]
+          if(evalResult.outputText) { resultParams << [out: evalResult.outputText] }
+          if(evalResult.bindings) { resultParams << [bindings: evalResult.bindings] }
 
-            if(!evalResult.stackTrace) {
-              data = [currentClientId?.toInteger(), "groovy.res", [result: evalResult.result?:"null"] + resultParams]
-            } else {
-              data = [currentClientId?.toInteger(), "groovy.err", [ex: evalResult.stackTrace] + resultParams]
-            }
+          if(!evalResult.stackTrace) {
+            data = [currentClientId?.toInteger(), "groovy.res", [result: evalResult.result?:"null"] + resultParams]
+          } else {
+            data = [currentClientId?.toInteger(), "groovy.err", [ex: evalResult.stackTrace] + resultParams]
+          }
 
+          sendData data
 
-            w = new PrintWriter( output )
-            json = new JsonBuilder(data).toString() + "\n"
-            log "Sender json til LT: $json"
-            w << json
-            w.flush()
+          break
 
-            break
-          default:
-            log "Invalid command: $command"
-        }
-
+        default:
+          log "Invalid command: $command"
       }
-    } catch (Exception e) {
-      log "Error reading from socket inputstream: $e"
+
     }
-  }
-  log "Outside try readline... "
-  if (client.closed) {
-    log "Error socket gone..."
+  } catch (Exception e) {
+    log "Error reading from socket inputstream: $e"
+    e.printStackTrace()
     System.exit(1)
   }
 }
 
-
-
-log "End of the world, should not get here really..."
 
 

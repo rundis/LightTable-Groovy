@@ -48,7 +48,14 @@ class ScriptExecutor {
     [
       result: result == null ? "" : result.toString(),
       outputText: stream.toString(encoding),
-      stackTrace: stacktrace.toString()
+      stackTrace: stacktrace.toString(),
+      bindings: filterBindings(aBinding)
     ]
+  }
+
+  static def filterBindings(binding) {
+    binding.variables.findAll {it.key != "out"}.collectEntries {key, val ->
+      val?.toString().contains("closure") ? [(key) : val.toString()] : [(key) : val]
+    }
   }
 }
