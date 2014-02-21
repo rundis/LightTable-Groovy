@@ -1,4 +1,8 @@
 apply plugin: 'groovy'
+apply plugin: 'application'
+
+archivesBaseName = "ltgroovy"
+mainClassName = 'lt.groovy.LTServer'
 
 repositories {
     jcenter()
@@ -22,3 +26,4 @@ sourceSets {
         }
     }
 }
+
