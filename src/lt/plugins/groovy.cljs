@@ -23,7 +23,7 @@
 (def shell (load/node-module "shelljs"))
 (def plugin-dir (plugins/find-plugin "Groovy"))
 (def binary-path (files/join plugin-dir "./run-server.sh"))
-(def server-path (files/join plugin-dir "groovy-src/LTServer.groovy"))
+(def server-path (files/join plugin-dir "lib/ltserver.jar"))
 
 
 (behavior ::on-out
@@ -169,23 +169,30 @@
                                       origin))))
 
 
+(defn notify-of-results [editor res]
+  (.log js/console result)
+  (doseq [ln (:result res)]
+    (object/raise editor :editor.result (clojure.string/join " " (:values ln)) {:line (+ (:line ln) (-> res :meta :start) -1)
+                                                                                :start-line (+ (:line ln) (-> res :meta :start) -1)})))
 
 (behavior ::groovy-res
           :triggers #{:groovy.res}
           :reaction (fn [editor res]
                       (notifos/done-working)
                       (when-let [o (:out res)] (.log js/console o))
-                      (object/raise editor :editor.result (str (:result res) "\n" (:bindings res)) {:line (:end (:meta res))
-                                                                         :start-line (-> res :meta :start)})))
+                      (notify-of-results editor res)))
+
+(defn notify-of-error [editor res]
+  (object/raise editor :editor.exception (:ex res) {:line (+ (-> res :ex :line) (-> res :meta :start) -1)
+                                                    :start-line (+ (-> res :ex :line) (-> res :meta :start) -1)}))
 
 (behavior ::groovy-err
           :triggers #{:groovy.err}
           :reaction (fn [editor res]
                       (notifos/done-working)
                       (when-let [o (:out res)] (.log js/console o))
-                      (object/raise editor :editor.exception (:ex res) {:line (-> res :meta :end)
-                                                                        :start-line (-> res :meta :start)})))
-
+                      (notify-of-results editor res)
+                      (notify-of-error editor res)))
 
 
 (behavior ::connect
@@ -194,12 +201,12 @@
                       (try-connect {:info {:path path}})))
 
 (behavior ::client-enable-logging
-            :triggers #{:object.instant}
-            :desc "Groovy: Log groovy client output to lt_groovy.log"
-            :type :user
-            :exclusive true
-            :reaction (fn [this]
-                        (object/merge! groovy {::enable-client-logging? true})))
+          :triggers #{:object.instant}
+          :desc "Groovy: Log groovy client output to lt_groovy.log"
+          :type :user
+          :exclusive true
+          :reaction (fn [this]
+                      (object/merge! groovy {::enable-client-logging? true})))
 
 
 (object/object* ::groovy-lang

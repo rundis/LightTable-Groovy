@@ -29,7 +29,20 @@ class ScriptExecutorSpec extends Specification {
         def results = executor.execute(code)
 
         then:
-        results.err.contains("RuntimeException")
+        results.err.msg.contains("RuntimeException")
+        results.err.line == 1
+    }
+
+    def "execute multiple scripts"() {
+        when:
+        def results = executor.execute("println 'hello'")
+        then:
+        !results.err
+
+        when:
+        results = executor.execute("println 'world'")
+        then:
+        !results.err
     }
 
 }

@@ -7,14 +7,6 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 
 
 class ScriptExecutor {
-    final GroovyShell shell
-
-    ScriptExecutor() {
-        def transform = new ScriptTransform()
-        def conf = new CompilerConfiguration()
-        conf.addCompilationCustomizers(new ASTTransformationCustomizer(transform))
-        shell = new GroovyShell(conf)
-    }
 
     def execute(String scriptText) {
 
@@ -40,18 +32,19 @@ class ScriptExecutor {
         System.setOut(printStream)
         System.setErr(printStream)
 
+        def shell = createShell()
         def result = ""
+        def errLine = scriptText.readLines().size()
         def script
-        def values_ = []
         try {
             script = shell.parse(scriptText)
             script.binding = aBinding
             result = script.run()
-            values_ = script.values_
         } catch (MultipleCompilationErrorsException e) {
             stacktrace.append(e.message - 'startup failed, Script1.groovy: ')
         } catch (Throwable t) {
             StackTraceUtils.deepSanitize(t)
+            errLine = Math.min(t.stackTrace.find{it.lineNumber}?.lineNumber?: errLine, errLine)
             t.printStackTrace(errWriter)
         } finally {
             System.setOut(originalOut)
@@ -66,9 +59,16 @@ class ScriptExecutor {
         [
                 result: result == null ? "" : result.toString(),
                 out: stream.toString(encoding),
-                err: stacktrace.toString(),
+                err: stacktrace.toString() ? [msg: stacktrace.toString(), line: errLine] : null,
                 bindings: aBinding,
-                exprValues: values_
+                exprValues: script?.values_
         ]
+    }
+
+    private GroovyShell createShell() {
+        def transform = new ScriptTransform()
+        def conf = new CompilerConfiguration()
+        conf.addCompilationCustomizers(new ASTTransformationCustomizer(transform))
+        new GroovyShell(conf)
     }
 }

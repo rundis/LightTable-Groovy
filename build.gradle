@@ -27,3 +27,11 @@ sourceSets {
     }
 }
 
+task deploy(type: Copy, dependsOn: jar) {
+    //inputs.files jar.archivePath
+    //outputs.files
+
+    from jar.archivePath
+    into 'lib'
+}
+
