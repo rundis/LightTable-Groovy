@@ -45,4 +45,18 @@ class ScriptExecutorSpec extends Specification {
         !results.err
     }
 
+    def "reports illegal script when no main"() {
+        when:
+        def results = executor.execute("""
+            class Dummy {
+                String dill
+                Integer dall
+            }
+        """)
+
+        then:
+        results.err.msg.contains("No signature of method: Dummy.main()")
+        results.err.line == 6
+    }
+
 }

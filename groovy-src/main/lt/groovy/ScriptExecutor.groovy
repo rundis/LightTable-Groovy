@@ -44,7 +44,7 @@ class ScriptExecutor {
             stacktrace.append(e.message - 'startup failed, Script1.groovy: ')
         } catch (Throwable t) {
             StackTraceUtils.deepSanitize(t)
-            errLine = Math.min(t.stackTrace.find{it.lineNumber}?.lineNumber?: errLine, errLine)
+            errLine = findErrLineNum(t, errLine)
             t.printStackTrace(errWriter)
         } finally {
             System.setOut(originalOut)
@@ -56,12 +56,13 @@ class ScriptExecutor {
             }
         }
 
+        def errMsg = stacktrace.toString()
         [
                 result: result == null ? "" : result.toString(),
                 out: stream.toString(encoding),
-                err: stacktrace.toString() ? [msg: stacktrace.toString(), line: errLine] : null,
+                err: errMsg ? [msg: errMsg, line: errLine] : null,
                 bindings: aBinding,
-                exprValues: script?.values_
+                exprValues: script?.hasProperty("values_") ? script?.values_ : []
         ]
     }
 
@@ -70,5 +71,10 @@ class ScriptExecutor {
         def conf = new CompilerConfiguration()
         conf.addCompilationCustomizers(new ASTTransformationCustomizer(transform))
         new GroovyShell(conf)
+    }
+
+    private Integer findErrLineNum(Throwable t, numLinesInScript) {
+        def lineNo = Math.min(t.stackTrace.find{it.lineNumber}?.lineNumber?:numLinesInScript, numLinesInScript)
+        lineNo > 0 ? lineNo : numLinesInScript
     }
 }
