@@ -18,7 +18,7 @@ class ScriptExecutorSpec extends Specification {
 
         then:
         results.out == "hello\n"
-        results.exprValues == [[value: null, line: 2], [value: 1, line: 3]]
+        results.exprValues.toString() == [[value: null, line: 2], [value: 1, line: 3]].toString()
         !results.err
         results.result == "1"
     }
