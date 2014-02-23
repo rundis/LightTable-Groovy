@@ -69,10 +69,6 @@
                         nil))
 
 
-(defn groovy-watch [meta src]
-  (let [meta-str (str "%q(" (js/JSON.stringify (clj->js meta)) ")")]
-    (str "LtWatch.watch(" src ", JSON.parse(" meta-str "))")))
-
 
 (defn run-groovy[{:keys [path name client] :as info}]
   (let [obj (object/create ::connecting-notifier info)
@@ -132,25 +128,19 @@
           :reaction (fn [editor]
                       (object/raise groovy :eval! {:origin editor
                                                    :info (assoc (@editor :info)
-                                                           :code (watches/watched-range editor nil nil groovy-watch)
+                                                           :code (ed/->val editor)
                                                            :meta {:start 0, :end (ed/last-line editor)})})))
 (behavior ::on-eval.one
           :desc "Groovy: Eval current selection"
           :triggers #{:eval.one}
           :reaction (fn [editor]
                       (let [pos (ed/->cursor editor)
-                            code (if (ed/selection? editor)
-                                   (watches/watched-range editor nil nil groovy-watch)
-                                   (ed/line editor (:line pos)))
-                            info (:info @editor)
-                            info (if (ed/selection? editor)
-                                   (assoc info
-                                     :code (ed/selection editor)
-                                     :meta {:start (-> (ed/->cursor editor "start") :line)
-                                            :end (-> (ed/->cursor editor "end") :line)})
-                                   (assoc info :pos pos :code code :meta {:start (:line pos) :end (:line pos)}))]
-                        (object/raise groovy :eval! {:origin editor
-                                                     :info info}))))
+                            info (conj (:info @editor)
+                                  (if (ed/selection? editor)
+                                    {:code (ed/selection editor) :meta {:start (-> (ed/->cursor editor "start") :line)
+                                                                        :end (-> (ed/->cursor editor "end") :line)}}
+                                    {:pos pos :code (ed/line editor (:line pos)) :meta {:start (:line pos) :end (:line pos)}}))]
+                        (object/raise groovy :eval! {:origin editor :info info}))))
 
 
 (behavior ::eval!
@@ -163,10 +153,8 @@
                                                          :origin origin
                                                          :info info
                                                          :create try-connect})
-                                      :editor.eval.groovy
-                                      info
-                                      :only
-                                      origin))))
+                                      :editor.eval.groovy info
+                                      :only origin))))
 
 
 (defn notify-of-results [editor res]
