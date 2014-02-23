@@ -26,7 +26,7 @@ class CollectSpec extends Specification {
 
         then:
         !retVal
-        script.values_ == [[value: null, line: 1]]
+        script.values_.toString() == [[value:null, line:1]].toString()
     }
 
     @Unroll()
@@ -40,10 +40,11 @@ class CollectSpec extends Specification {
 
         where:
         statement                       | expectedValues
-        "i = 1"                         | [[value: 1, line: 1]]
-        "def i = 1"                     | [[value: 1, line: 1]]
-        "[1,2,3].collect{it*2}"         | [[value: [2, 4, 6], line: 1]]
-        "def (o, p, q) = 'abc' as List" | [[value: ["a", "b", "c"], line: 1]]
+        "i = 1"                         | [[value: 1 as String, line: 1]]
+        "def i = 1"                     | [[value: 1 as String, line: 1]]
+        "[1,2,3].collect{it*2}"         | [[value: [2, 4, 6] as String, line: 1]]
+        "def (o, p, q) = 'abc' as List" | [[value: ["a", "b", "c"] as String, line: 1]]
+        "def a = [1] ; a[0] = 2"        | [[value: [1] as String, line: 1]]
     }
 
     def "if and while fun"() {
@@ -64,8 +65,7 @@ class CollectSpec extends Specification {
         script.run()
 
         then:
-        script.values_ == [
-                [value:2, line:2],
+        script.values_.toString() == [[value:2, line:2],
                 [value:2, line:3],
                 [value:1, line:4],
                 [value:1, line:5],
@@ -74,8 +74,7 @@ class CollectSpec extends Specification {
                 [value:0, line:4],
                 [value:0, line:8],
                 [value:null, line:9],
-                [value:0, line:3]
-        ]
+                [value:0, line:3]].toString()
     }
 
     def "classes are fine"() {
@@ -94,7 +93,7 @@ class CollectSpec extends Specification {
         script.run()
 
         then:
-        script.values_ == [[value:242, line:8], [value:121, line:9]]
+        script.values_.toString() == [[value:242, line:8], [value:121, line:9]].toString()
     }
 
     def "We can handle closures"() {
@@ -110,7 +109,7 @@ class CollectSpec extends Specification {
         then:
         script.values_[0].line == 2
         script.values_[0].value.toString().contains("closure")
-        script.values_[1] == [value: 16, line: 3]
+        script.values_[1].toString() == [value:16, line:3].toString()
     }
 
 
