@@ -18,6 +18,8 @@ class CollectSpec extends Specification {
         shell = new GroovyShell(conf)
     }
 
+
+
     def "printlns return 0"() {
         when:
         def code = "println 'hello'"
@@ -26,7 +28,7 @@ class CollectSpec extends Specification {
 
         then:
         !retVal
-        script.values_.toString() == [[value:null, line:1]].toString()
+        assertValues script.values_, [[value:null, line:1]]
     }
 
     @Unroll()
@@ -36,15 +38,15 @@ class CollectSpec extends Specification {
         script.run()
 
         then:
-        script.values_ == expectedValues
+        assertValues script.values_, expectedValues
 
         where:
         statement                       | expectedValues
-        "i = 1"                         | [[value: 1 as String, line: 1]]
-        "def i = 1"                     | [[value: 1 as String, line: 1]]
-        "[1,2,3].collect{it*2}"         | [[value: [2, 4, 6] as String, line: 1]]
-        "def (o, p, q) = 'abc' as List" | [[value: ["a", "b", "c"] as String, line: 1]]
-        "def a = [1] ; a[0] = 2"        | [[value: [1] as String, line: 1]]
+        "i = 1"                         | [[value: 1, line: 1]]
+        "def i = 1"                     | [[value: 1, line: 1]]
+        "[1,2,3].collect{it*2}"         | [[value: [2, 4, 6], line: 1]]
+        "def (o, p, q) = 'abc' as List" | [[value: ["a", "b", "c"], line: 1]]
+        "def a = [1] ; a[0] = 2"        | [[value: [1], line: 1]]
     }
 
     def "if and while fun"() {
@@ -65,7 +67,7 @@ class CollectSpec extends Specification {
         script.run()
 
         then:
-        script.values_.toString() == [[value:2, line:2],
+        assertValues script.values_, [[value:2, line:2],
                 [value:2, line:3],
                 [value:1, line:4],
                 [value:1, line:5],
@@ -74,7 +76,7 @@ class CollectSpec extends Specification {
                 [value:0, line:4],
                 [value:0, line:8],
                 [value:null, line:9],
-                [value:0, line:3]].toString()
+                [value:0, line:3]]
     }
 
     def "classes are fine"() {
@@ -93,7 +95,7 @@ class CollectSpec extends Specification {
         script.run()
 
         then:
-        script.values_.toString() == [[value:242, line:8], [value:121, line:9]].toString()
+        assertValues script.values_, [[value:242, line:8], [value:121, line:9]]
     }
 
     def "We can handle closures"() {
@@ -111,6 +113,21 @@ class CollectSpec extends Specification {
         script.values_[0].value.toString().contains("closure")
         script.values_[1].toString() == [value:16, line:3].toString()
     }
+
+
+
+    private def assertValues(actual, expected) {
+        def stringify = {values ->
+            values.collect {
+                [line: it.line, value: it.value != null ? it.value.toString() : "null"]
+            }
+        }
+
+        assert actual == stringify(expected)
+
+        true
+    }
+
 
 
 }
