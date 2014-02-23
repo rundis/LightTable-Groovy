@@ -158,7 +158,6 @@
 
 
 (defn notify-of-results [editor res]
-  (.log js/console result)
   (doseq [ln (:result res)]
     (let [lineNo (+ (:line ln) (-> res :meta :start) -1)]
       (object/raise editor :editor.result (clojure.string/join " " (:values ln)) {:line lineNo :start-line lineNo}))))
@@ -177,9 +176,7 @@
 (behavior ::groovy-err
           :triggers #{:groovy.err}
           :reaction (fn [editor res]
-                      (notifos/done-working)
-                      (when-let [o (:out res)] (.log js/console o))
-                      (notify-of-results editor res)
+                      (object/raise editor :groovy.res res)
                       (notify-of-error editor res)))
 
 
