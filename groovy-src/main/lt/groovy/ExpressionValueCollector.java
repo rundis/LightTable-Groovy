@@ -16,7 +16,7 @@ abstract public class ExpressionValueCollector extends Script {
     public Object _collect(int line, Object value) {
         Map entry = new HashMap();
         entry.put("line", line);
-        entry.put("value", value);
+        entry.put("value", value != null ? value.toString() : value);
         _values.add(entry);
         return value;
     }
