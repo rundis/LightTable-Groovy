@@ -15,7 +15,7 @@ If you wish to submit pull request. Just fork this repo and install the plugin b
 
 To build the groovy bits a [Gradle](http://www.gradle.org) wrapper script is provided:
 ```bash
-  $ gradlew build deploy
+  $ ./gradlew build deploy
 ```
 
 
@@ -32,7 +32,28 @@ Simple syntax highlighting is provided throught the use of [CodeMirror](https://
 * `ctrl/cmd-shift-enter` evaluates all content in the current editor, prints any output to the console and shows results line by line.
 * `ctrl/cmd-enter` evaluates the selected text/current line, prints output to the console and shows results inline for selected line(s).
 
+
 Values for all top level expressions are shown. In looping constructs a max of 10 values are displayed for any given line. Exceptions are also displayed. If there are any exceptions, any values recorded prior to the exception arising are also shown.
+
+#### Bindings
+Bindings are stored/cached per editor. This gives you a behavior resembling a repl, but with many limitations. Anything that is evaluated is run as a groovy script, so obviously the same restrictions apply.
+
+```Groovy
+def myVar = 4
+
+println myVar // will crash if you evaluate each line separately (ie two separate evals)
+```
+
+```Groovy
+myVar = 4
+
+println myVar // will work fine when evaluating lines separately, because myVar will be stored in binding
+```
+
+
+If you wish to clear all bindings for an editor invoke the command __Groovy: Clear bindings for current editor__ (you probably would want to assign your own keyboard shortcut for it !)
+
+
 
 
 
@@ -44,6 +65,7 @@ If you wish to enable debug logging from the groovy client. Add the following to
 Output is written to: ```$groovy-plugin-dir$/lt_groovy.log```
 
 ## Version history
+* 0.0.3 A hint of REPL. Storing binding variables between evals allows for a more REPL like experience.
 * 0.0.2 Inline results for almost any top level line expression yielding values are shown. Removed display of binding variables (no longer needed). The majority of the features for this release are due to awesome groovy ast contributions from [Jim White](https://github.com/jimwhite)
 * 0.0.1 Support for simple syntax highligting and evaluation of groovy scripts with inline results.
 
