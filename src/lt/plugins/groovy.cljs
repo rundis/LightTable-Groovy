@@ -145,8 +145,7 @@
 (behavior ::eval!
           :triggers #{:eval!}
           :reaction (fn [this event]
-                      (let [{:keys [info origin]} event
-                            client (-> @origin :client :default)]
+                      (let [{:keys [info origin]} event]
                         (notifos/working "Evaluating groovy...")
                         (clients/send (eval/get-client! {:command :editor.eval.groovy
                                                          :origin origin
@@ -154,6 +153,27 @@
                                                          :create try-connect})
                                       :editor.eval.groovy info
                                       :only origin))))
+
+
+(behavior ::on-clear-bindings
+          :desc "Clear cached bindings for this editor"
+          :triggers #{:on.clear.bindings}
+          :reaction (fn [editor]
+                      (let [info (:info @editor)
+                            cl (eval/get-client! {:command :editor.clear.groovy
+                                                    :origin editor
+                                                    :info info
+                                                    :create try-connect})]
+                          (clients/send cl
+                                        :editor.clear.groovy info
+                                        :only editor))))
+
+(cmd/command {:command :clear-bindings
+              :desc "Groovy: Clear bindings for current editor"
+              :exec (fn []
+                      (when-let [ed (pool/last-active)]
+                        (object/raise ed :on.clear.bindings)))})
+
 
 
 (defn notify-of-results [editor res]
@@ -164,7 +184,7 @@
 (behavior ::groovy-res
           :triggers #{:groovy.res}
           :reaction (fn [editor res]
-                      (notifos/done-working)
+                      (notifos/done-working "Groovy evaluated")
                       (when-let [o (:out res)] (.log js/console o))
                       (notify-of-results editor res)))
 

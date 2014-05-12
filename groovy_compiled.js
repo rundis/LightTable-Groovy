@@ -70,7 +70,7 @@ lt.object.behavior_STAR_.call(null,new cljs.core.Keyword("lt.plugins.groovy","on
 lt.object.object_STAR_.call(null,new cljs.core.Keyword("lt.plugins.groovy","connecting-notifier","lt.plugins.groovy/connecting-notifier",2578157599),new cljs.core.Keyword(null,"triggers","triggers",2516997421),cljs.core.PersistentVector.EMPTY,new cljs.core.Keyword(null,"behaviors","behaviors",607554515),new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword("lt.plugins.groovy","on-exit","lt.plugins.groovy/on-exit",624270544),new cljs.core.Keyword("lt.plugins.groovy","on-error","lt.plugins.groovy/on-error",2638843290),new cljs.core.Keyword("lt.plugins.groovy","on-out","lt.plugins.groovy/on-out",1239098084)], null),new cljs.core.Keyword(null,"init","init",1017141378),(function (this$,client){lt.object.merge_BANG_.call(null,this$,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"client","client",3951159101),client,new cljs.core.Keyword(null,"buffer","buffer",3930752946),""], null));
 return null;
 }));
-lt.plugins.groovy.run_groovy = (function run_groovy(p__8345){var map__8347 = p__8345;var map__8347__$1 = ((cljs.core.seq_QMARK_.call(null,map__8347))?cljs.core.apply.call(null,cljs.core.hash_map,map__8347):map__8347);var info = map__8347__$1;var client = cljs.core.get.call(null,map__8347__$1,new cljs.core.Keyword(null,"client","client",3951159101));var name = cljs.core.get.call(null,map__8347__$1,new cljs.core.Keyword(null,"name","name",1017277949));var path = cljs.core.get.call(null,map__8347__$1,new cljs.core.Keyword(null,"path","path",1017337751));var obj = lt.object.create.call(null,new cljs.core.Keyword("lt.plugins.groovy","connecting-notifier","lt.plugins.groovy/connecting-notifier",2578157599),info);var client_id = lt.objs.clients.__GT_id.call(null,client);var project_dir = lt.objs.files.parent.call(null,path);lt.object.merge_BANG_.call(null,client,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"port","port",1017351155),lt.objs.clients.tcp.port,new cljs.core.Keyword(null,"proc","proc",1017353928),obj], null));
+lt.plugins.groovy.run_groovy = (function run_groovy(p__8879){var map__8881 = p__8879;var map__8881__$1 = ((cljs.core.seq_QMARK_.call(null,map__8881))?cljs.core.apply.call(null,cljs.core.hash_map,map__8881):map__8881);var info = map__8881__$1;var client = cljs.core.get.call(null,map__8881__$1,new cljs.core.Keyword(null,"client","client",3951159101));var name = cljs.core.get.call(null,map__8881__$1,new cljs.core.Keyword(null,"name","name",1017277949));var path = cljs.core.get.call(null,map__8881__$1,new cljs.core.Keyword(null,"path","path",1017337751));var obj = lt.object.create.call(null,new cljs.core.Keyword("lt.plugins.groovy","connecting-notifier","lt.plugins.groovy/connecting-notifier",2578157599),info);var client_id = lt.objs.clients.__GT_id.call(null,client);var project_dir = lt.objs.files.parent.call(null,path);lt.object.merge_BANG_.call(null,client,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"port","port",1017351155),lt.objs.clients.tcp.port,new cljs.core.Keyword(null,"proc","proc",1017353928),obj], null));
 lt.objs.notifos.working.call(null,"Connecting..");
 return lt.objs.proc.exec.call(null,new cljs.core.PersistentArrayMap(null, 5, [new cljs.core.Keyword(null,"command","command",1964298941),lt.plugins.groovy.binary_path,new cljs.core.Keyword(null,"args","args",1016906831),new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMPTY_NODE, [lt.objs.clients.tcp.port,client_id,project_dir], null),new cljs.core.Keyword(null,"cwd","cwd",1014003170),lt.plugins.groovy.plugin_dir,new cljs.core.Keyword(null,"env","env",1014004831),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"LT_GROOVY_LOG","LT_GROOVY_LOG",4465086972),new cljs.core.Keyword("lt.plugins.groovy","enable-client-logging?","lt.plugins.groovy/enable-client-logging?",4091824316).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,lt.plugins.groovy.groovy))], null),new cljs.core.Keyword(null,"obj","obj",1014014057),obj], null));
 });
@@ -88,7 +88,7 @@ lt.objs.notifos.done_working.call(null);
 return lt.objs.popup.popup_BANG_.call(null,new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null,"header","header",4087600639),"We couldn't find Groovy.",new cljs.core.Keyword(null,"body","body",1016933652),"In order to evaluate in Groovy files, Groovy must be installed and on your system PATH.",new cljs.core.Keyword(null,"buttons","buttons",1255256819),new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"label","label",1116631654),"Download Groovy",new cljs.core.Keyword(null,"action","action",3885920680),(function (){return lt.objs.platform.open.call(null,"http://gvmtool.net/");
 })], null),new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"label","label",1116631654),"ok"], null)], null)], null));
 });
-lt.plugins.groovy.notify = (function notify(obj){var map__8349 = obj;var map__8349__$1 = ((cljs.core.seq_QMARK_.call(null,map__8349))?cljs.core.apply.call(null,cljs.core.hash_map,map__8349):map__8349);var client = cljs.core.get.call(null,map__8349__$1,new cljs.core.Keyword(null,"client","client",3951159101));var groovy_server = cljs.core.get.call(null,map__8349__$1,new cljs.core.Keyword(null,"groovy-server","groovy-server",2729950548));var path = cljs.core.get.call(null,map__8349__$1,new cljs.core.Keyword(null,"path","path",1017337751));var groovy = cljs.core.get.call(null,map__8349__$1,new cljs.core.Keyword(null,"groovy","groovy",4071405440));if((cljs.core.not.call(null,groovy)) || (cljs.core.empty_QMARK_.call(null,groovy)))
+lt.plugins.groovy.notify = (function notify(obj){var map__8883 = obj;var map__8883__$1 = ((cljs.core.seq_QMARK_.call(null,map__8883))?cljs.core.apply.call(null,cljs.core.hash_map,map__8883):map__8883);var client = cljs.core.get.call(null,map__8883__$1,new cljs.core.Keyword(null,"client","client",3951159101));var groovy_server = cljs.core.get.call(null,map__8883__$1,new cljs.core.Keyword(null,"groovy-server","groovy-server",2729950548));var path = cljs.core.get.call(null,map__8883__$1,new cljs.core.Keyword(null,"path","path",1017337751));var groovy = cljs.core.get.call(null,map__8883__$1,new cljs.core.Keyword(null,"groovy","groovy",4071405440));if((cljs.core.not.call(null,groovy)) || (cljs.core.empty_QMARK_.call(null,groovy)))
 {lt.plugins.groovy.handle_no_groovy.call(null,client);
 } else
 {if(new cljs.core.Keyword(null,"else","else",1017020587))
@@ -100,7 +100,7 @@ return obj;
 });
 lt.plugins.groovy.check_all = (function check_all(obj){return lt.plugins.groovy.notify.call(null,lt.plugins.groovy.check_server.call(null,lt.plugins.groovy.check_groovy.call(null,obj)));
 });
-lt.plugins.groovy.try_connect = (function try_connect(p__8350){var map__8352 = p__8350;var map__8352__$1 = ((cljs.core.seq_QMARK_.call(null,map__8352))?cljs.core.apply.call(null,cljs.core.hash_map,map__8352):map__8352);var info = cljs.core.get.call(null,map__8352__$1,new cljs.core.Keyword(null,"info","info",1017141280));var path = new cljs.core.Keyword(null,"path","path",1017337751).cljs$core$IFn$_invoke$arity$1(info);var client = lt.objs.clients.client_BANG_.call(null,new cljs.core.Keyword(null,"groovy.client","groovy.client",3165568285));lt.plugins.groovy.check_all.call(null,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"path","path",1017337751),path,new cljs.core.Keyword(null,"client","client",3951159101),client], null));
+lt.plugins.groovy.try_connect = (function try_connect(p__8884){var map__8886 = p__8884;var map__8886__$1 = ((cljs.core.seq_QMARK_.call(null,map__8886))?cljs.core.apply.call(null,cljs.core.hash_map,map__8886):map__8886);var info = cljs.core.get.call(null,map__8886__$1,new cljs.core.Keyword(null,"info","info",1017141280));var path = new cljs.core.Keyword(null,"path","path",1017337751).cljs$core$IFn$_invoke$arity$1(info);var client = lt.objs.clients.client_BANG_.call(null,new cljs.core.Keyword(null,"groovy.client","groovy.client",3165568285));lt.plugins.groovy.check_all.call(null,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"path","path",1017337751),path,new cljs.core.Keyword(null,"client","client",3951159101),client], null));
 return client;
 });
 lt.plugins.groovy.__BEH__on_eval = (function __BEH__on_eval(editor){return lt.object.raise.call(null,lt.plugins.groovy.groovy,new cljs.core.Keyword(null,"eval!","eval!",1110791799),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"origin","origin",4300251800),editor,new cljs.core.Keyword(null,"info","info",1017141280),cljs.core.assoc.call(null,cljs.core.deref.call(null,editor).call(null,new cljs.core.Keyword(null,"info","info",1017141280)),new cljs.core.Keyword(null,"code","code",1016963423),lt.objs.editor.__GT_val.call(null,editor),new cljs.core.Keyword(null,"meta","meta",1017252215),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"start","start",1123661780),0,new cljs.core.Keyword(null,"end","end",1014004813),lt.objs.editor.last_line.call(null,editor)], null))], null));
@@ -109,49 +109,58 @@ lt.object.behavior_STAR_.call(null,new cljs.core.Keyword("lt.plugins.groovy","on
 lt.plugins.groovy.__BEH__on_eval__DOT__one = (function __BEH__on_eval__DOT__one(editor){var pos = lt.objs.editor.__GT_cursor.call(null,editor);var info = cljs.core.conj.call(null,new cljs.core.Keyword(null,"info","info",1017141280).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,editor)),(cljs.core.truth_(lt.objs.editor.selection_QMARK_.call(null,editor))?new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"code","code",1016963423),lt.objs.editor.selection.call(null,editor),new cljs.core.Keyword(null,"meta","meta",1017252215),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"start","start",1123661780),new cljs.core.Keyword(null,"line","line",1017226086).cljs$core$IFn$_invoke$arity$1(lt.objs.editor.__GT_cursor.call(null,editor,"start")),new cljs.core.Keyword(null,"end","end",1014004813),new cljs.core.Keyword(null,"line","line",1017226086).cljs$core$IFn$_invoke$arity$1(lt.objs.editor.__GT_cursor.call(null,editor,"end"))], null)], null):new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null,"pos","pos",1014015430),pos,new cljs.core.Keyword(null,"code","code",1016963423),lt.objs.editor.line.call(null,editor,new cljs.core.Keyword(null,"line","line",1017226086).cljs$core$IFn$_invoke$arity$1(pos)),new cljs.core.Keyword(null,"meta","meta",1017252215),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"start","start",1123661780),new cljs.core.Keyword(null,"line","line",1017226086).cljs$core$IFn$_invoke$arity$1(pos),new cljs.core.Keyword(null,"end","end",1014004813),new cljs.core.Keyword(null,"line","line",1017226086).cljs$core$IFn$_invoke$arity$1(pos)], null)], null)));return lt.object.raise.call(null,lt.plugins.groovy.groovy,new cljs.core.Keyword(null,"eval!","eval!",1110791799),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"origin","origin",4300251800),editor,new cljs.core.Keyword(null,"info","info",1017141280),info], null));
 });
 lt.object.behavior_STAR_.call(null,new cljs.core.Keyword("lt.plugins.groovy","on-eval.one","lt.plugins.groovy/on-eval.one",656487106),new cljs.core.Keyword(null,"reaction","reaction",4441361819),lt.plugins.groovy.__BEH__on_eval__DOT__one,new cljs.core.Keyword(null,"desc","desc",1016984067),"Groovy: Eval current selection",new cljs.core.Keyword(null,"triggers","triggers",2516997421),new cljs.core.PersistentHashSet(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"eval.one","eval.one",1173589382),null], null), null));
-lt.plugins.groovy.__BEH__eval_BANG_ = (function __BEH__eval_BANG_(this$,event){var map__8354 = event;var map__8354__$1 = ((cljs.core.seq_QMARK_.call(null,map__8354))?cljs.core.apply.call(null,cljs.core.hash_map,map__8354):map__8354);var origin = cljs.core.get.call(null,map__8354__$1,new cljs.core.Keyword(null,"origin","origin",4300251800));var info = cljs.core.get.call(null,map__8354__$1,new cljs.core.Keyword(null,"info","info",1017141280));var client = new cljs.core.Keyword(null,"default","default",2558708147).cljs$core$IFn$_invoke$arity$1(new cljs.core.Keyword(null,"client","client",3951159101).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,origin)));lt.objs.notifos.working.call(null,"Evaluating groovy...");
+lt.plugins.groovy.__BEH__eval_BANG_ = (function __BEH__eval_BANG_(this$,event){var map__8888 = event;var map__8888__$1 = ((cljs.core.seq_QMARK_.call(null,map__8888))?cljs.core.apply.call(null,cljs.core.hash_map,map__8888):map__8888);var origin = cljs.core.get.call(null,map__8888__$1,new cljs.core.Keyword(null,"origin","origin",4300251800));var info = cljs.core.get.call(null,map__8888__$1,new cljs.core.Keyword(null,"info","info",1017141280));lt.objs.notifos.working.call(null,"Evaluating groovy...");
 return lt.objs.clients.send.call(null,lt.objs.eval.get_client_BANG_.call(null,new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null,"command","command",1964298941),new cljs.core.Keyword(null,"editor.eval.groovy","editor.eval.groovy",2695176721),new cljs.core.Keyword(null,"origin","origin",4300251800),origin,new cljs.core.Keyword(null,"info","info",1017141280),info,new cljs.core.Keyword(null,"create","create",3956577390),lt.plugins.groovy.try_connect], null)),new cljs.core.Keyword(null,"editor.eval.groovy","editor.eval.groovy",2695176721),info,new cljs.core.Keyword(null,"only","only",1017320222),origin);
 });
 lt.object.behavior_STAR_.call(null,new cljs.core.Keyword("lt.plugins.groovy","eval!","lt.plugins.groovy/eval!",2342640133),new cljs.core.Keyword(null,"reaction","reaction",4441361819),lt.plugins.groovy.__BEH__eval_BANG_,new cljs.core.Keyword(null,"triggers","triggers",2516997421),new cljs.core.PersistentHashSet(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"eval!","eval!",1110791799),null], null), null));
-lt.plugins.groovy.notify_of_results = (function notify_of_results(editor,res){var seq__8359 = cljs.core.seq.call(null,new cljs.core.Keyword(null,"result","result",4374444943).cljs$core$IFn$_invoke$arity$1(res));var chunk__8360 = null;var count__8361 = 0;var i__8362 = 0;while(true){
-if((i__8362 < count__8361))
-{var ln = cljs.core._nth.call(null,chunk__8360,i__8362);var lineNo_8363 = ((new cljs.core.Keyword(null,"line","line",1017226086).cljs$core$IFn$_invoke$arity$1(ln) + new cljs.core.Keyword(null,"start","start",1123661780).cljs$core$IFn$_invoke$arity$1(new cljs.core.Keyword(null,"meta","meta",1017252215).cljs$core$IFn$_invoke$arity$1(res))) + -1);lt.object.raise.call(null,editor,new cljs.core.Keyword(null,"editor.result","editor.result",4030217008),clojure.string.join.call(null," ",new cljs.core.Keyword(null,"values","values",4485058708).cljs$core$IFn$_invoke$arity$1(ln)),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"line","line",1017226086),lineNo_8363,new cljs.core.Keyword(null,"start-line","start-line",3689311729),lineNo_8363], null));
+lt.plugins.groovy.__BEH__on_clear_bindings = (function __BEH__on_clear_bindings(editor){var info = new cljs.core.Keyword(null,"info","info",1017141280).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,editor));var cl = lt.objs.eval.get_client_BANG_.call(null,new cljs.core.PersistentArrayMap(null, 4, [new cljs.core.Keyword(null,"command","command",1964298941),new cljs.core.Keyword(null,"editor.clear.groovy","editor.clear.groovy",2933057826),new cljs.core.Keyword(null,"origin","origin",4300251800),editor,new cljs.core.Keyword(null,"info","info",1017141280),info,new cljs.core.Keyword(null,"create","create",3956577390),lt.plugins.groovy.try_connect], null));return lt.objs.clients.send.call(null,cl,new cljs.core.Keyword(null,"editor.clear.groovy","editor.clear.groovy",2933057826),info,new cljs.core.Keyword(null,"only","only",1017320222),editor);
+});
+lt.object.behavior_STAR_.call(null,new cljs.core.Keyword("lt.plugins.groovy","on-clear-bindings","lt.plugins.groovy/on-clear-bindings",2767221312),new cljs.core.Keyword(null,"reaction","reaction",4441361819),lt.plugins.groovy.__BEH__on_clear_bindings,new cljs.core.Keyword(null,"desc","desc",1016984067),"Clear cached bindings for this editor",new cljs.core.Keyword(null,"triggers","triggers",2516997421),new cljs.core.PersistentHashSet(null, new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null,"on.clear.bindings","on.clear.bindings",1493420144),null], null), null));
+lt.objs.command.command.call(null,new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null,"command","command",1964298941),new cljs.core.Keyword(null,"clear-bindings","clear-bindings",3103631744),new cljs.core.Keyword(null,"desc","desc",1016984067),"Groovy: Clear bindings for current editor",new cljs.core.Keyword(null,"exec","exec",1017031683),(function (){var temp__4092__auto__ = lt.objs.editor.pool.last_active.call(null);if(cljs.core.truth_(temp__4092__auto__))
+{var ed = temp__4092__auto__;return lt.object.raise.call(null,ed,new cljs.core.Keyword(null,"on.clear.bindings","on.clear.bindings",1493420144));
+} else
+{return null;
+}
+})], null));
+lt.plugins.groovy.notify_of_results = (function notify_of_results(editor,res){var seq__8893 = cljs.core.seq.call(null,new cljs.core.Keyword(null,"result","result",4374444943).cljs$core$IFn$_invoke$arity$1(res));var chunk__8894 = null;var count__8895 = 0;var i__8896 = 0;while(true){
+if((i__8896 < count__8895))
+{var ln = cljs.core._nth.call(null,chunk__8894,i__8896);var lineNo_8897 = ((new cljs.core.Keyword(null,"line","line",1017226086).cljs$core$IFn$_invoke$arity$1(ln) + new cljs.core.Keyword(null,"start","start",1123661780).cljs$core$IFn$_invoke$arity$1(new cljs.core.Keyword(null,"meta","meta",1017252215).cljs$core$IFn$_invoke$arity$1(res))) + -1);lt.object.raise.call(null,editor,new cljs.core.Keyword(null,"editor.result","editor.result",4030217008),clojure.string.join.call(null," ",new cljs.core.Keyword(null,"values","values",4485058708).cljs$core$IFn$_invoke$arity$1(ln)),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"line","line",1017226086),lineNo_8897,new cljs.core.Keyword(null,"start-line","start-line",3689311729),lineNo_8897], null));
 {
-var G__8364 = seq__8359;
-var G__8365 = chunk__8360;
-var G__8366 = count__8361;
-var G__8367 = (i__8362 + 1);
-seq__8359 = G__8364;
-chunk__8360 = G__8365;
-count__8361 = G__8366;
-i__8362 = G__8367;
+var G__8898 = seq__8893;
+var G__8899 = chunk__8894;
+var G__8900 = count__8895;
+var G__8901 = (i__8896 + 1);
+seq__8893 = G__8898;
+chunk__8894 = G__8899;
+count__8895 = G__8900;
+i__8896 = G__8901;
 continue;
 }
 } else
-{var temp__4092__auto__ = cljs.core.seq.call(null,seq__8359);if(temp__4092__auto__)
-{var seq__8359__$1 = temp__4092__auto__;if(cljs.core.chunked_seq_QMARK_.call(null,seq__8359__$1))
-{var c__7561__auto__ = cljs.core.chunk_first.call(null,seq__8359__$1);{
-var G__8368 = cljs.core.chunk_rest.call(null,seq__8359__$1);
-var G__8369 = c__7561__auto__;
-var G__8370 = cljs.core.count.call(null,c__7561__auto__);
-var G__8371 = 0;
-seq__8359 = G__8368;
-chunk__8360 = G__8369;
-count__8361 = G__8370;
-i__8362 = G__8371;
+{var temp__4092__auto__ = cljs.core.seq.call(null,seq__8893);if(temp__4092__auto__)
+{var seq__8893__$1 = temp__4092__auto__;if(cljs.core.chunked_seq_QMARK_.call(null,seq__8893__$1))
+{var c__7561__auto__ = cljs.core.chunk_first.call(null,seq__8893__$1);{
+var G__8902 = cljs.core.chunk_rest.call(null,seq__8893__$1);
+var G__8903 = c__7561__auto__;
+var G__8904 = cljs.core.count.call(null,c__7561__auto__);
+var G__8905 = 0;
+seq__8893 = G__8902;
+chunk__8894 = G__8903;
+count__8895 = G__8904;
+i__8896 = G__8905;
 continue;
 }
 } else
-{var ln = cljs.core.first.call(null,seq__8359__$1);var lineNo_8372 = ((new cljs.core.Keyword(null,"line","line",1017226086).cljs$core$IFn$_invoke$arity$1(ln) + new cljs.core.Keyword(null,"start","start",1123661780).cljs$core$IFn$_invoke$arity$1(new cljs.core.Keyword(null,"meta","meta",1017252215).cljs$core$IFn$_invoke$arity$1(res))) + -1);lt.object.raise.call(null,editor,new cljs.core.Keyword(null,"editor.result","editor.result",4030217008),clojure.string.join.call(null," ",new cljs.core.Keyword(null,"values","values",4485058708).cljs$core$IFn$_invoke$arity$1(ln)),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"line","line",1017226086),lineNo_8372,new cljs.core.Keyword(null,"start-line","start-line",3689311729),lineNo_8372], null));
+{var ln = cljs.core.first.call(null,seq__8893__$1);var lineNo_8906 = ((new cljs.core.Keyword(null,"line","line",1017226086).cljs$core$IFn$_invoke$arity$1(ln) + new cljs.core.Keyword(null,"start","start",1123661780).cljs$core$IFn$_invoke$arity$1(new cljs.core.Keyword(null,"meta","meta",1017252215).cljs$core$IFn$_invoke$arity$1(res))) + -1);lt.object.raise.call(null,editor,new cljs.core.Keyword(null,"editor.result","editor.result",4030217008),clojure.string.join.call(null," ",new cljs.core.Keyword(null,"values","values",4485058708).cljs$core$IFn$_invoke$arity$1(ln)),new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"line","line",1017226086),lineNo_8906,new cljs.core.Keyword(null,"start-line","start-line",3689311729),lineNo_8906], null));
 {
-var G__8373 = cljs.core.next.call(null,seq__8359__$1);
-var G__8374 = null;
-var G__8375 = 0;
-var G__8376 = 0;
-seq__8359 = G__8373;
-chunk__8360 = G__8374;
-count__8361 = G__8375;
-i__8362 = G__8376;
+var G__8907 = cljs.core.next.call(null,seq__8893__$1);
+var G__8908 = null;
+var G__8909 = 0;
+var G__8910 = 0;
+seq__8893 = G__8907;
+chunk__8894 = G__8908;
+count__8895 = G__8909;
+i__8896 = G__8910;
 continue;
 }
 }
@@ -162,9 +171,9 @@ continue;
 break;
 }
 });
-lt.plugins.groovy.__BEH__groovy_res = (function __BEH__groovy_res(editor,res){lt.objs.notifos.done_working.call(null);
-var temp__4092__auto___8377 = new cljs.core.Keyword(null,"out","out",1014014656).cljs$core$IFn$_invoke$arity$1(res);if(cljs.core.truth_(temp__4092__auto___8377))
-{var o_8378 = temp__4092__auto___8377;console.log(o_8378);
+lt.plugins.groovy.__BEH__groovy_res = (function __BEH__groovy_res(editor,res){lt.objs.notifos.done_working.call(null,"Groovy evaluated");
+var temp__4092__auto___8911 = new cljs.core.Keyword(null,"out","out",1014014656).cljs$core$IFn$_invoke$arity$1(res);if(cljs.core.truth_(temp__4092__auto___8911))
+{var o_8912 = temp__4092__auto___8911;console.log(o_8912);
 } else
 {}
 return lt.plugins.groovy.notify_of_results.call(null,editor,res);

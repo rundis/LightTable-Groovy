@@ -6,13 +6,17 @@ class ClientSessions {
 
 
     synchronized put(Integer clientId, Binding binding) {
-        Map variables = binding.variables
+        Map variables = binding?.variables?: [:]
         variables.remove("out")
         bindingSession.put(clientId, variables)
     }
 
     synchronized get(Integer clientId) {
         bindingSession.get(clientId)?: [:]
+    }
+
+    synchronized clear(Integer clientId) {
+        bindingSession.remove(clientId)
     }
 
 }

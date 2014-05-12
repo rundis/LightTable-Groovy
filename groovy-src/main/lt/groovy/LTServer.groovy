@@ -44,10 +44,13 @@ class LTServer {
                         case "client.close":
                             stop()
                             break
-
                         case "editor.eval.groovy":
                             evalGroovy(data, currentClientId)
                             break
+                        case "editor.clear.groovy":
+                            clientSessions.clear(currentClientId)
+                            log "Clearing bindings for client: $currentClientId"
+                            break;
                         default:
                             log "Invalid command: $command"
                     }
@@ -146,12 +149,13 @@ class LTServer {
                 name: "Groovy",
                 "client-id": clientId,
                 dir: new File("").absolutePath,
-                commands: ["editor.eval.groovy"],
+                commands: ["editor.eval.groovy", "editor.clear.groovy"],
                 type: "groovy"
             ]
         )
 
         println "Connected" // tells lighttable we're good
+
         ltServer.startRequestHandling()
     }
 }

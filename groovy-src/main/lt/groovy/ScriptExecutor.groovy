@@ -65,7 +65,7 @@ class ScriptExecutor {
                 result: result == null ? "" : result.toString(),
                 out: stream.toString(encoding),
                 err: errMsg ? [msg: errMsg, line: errLine] : null,
-                bindings: script.binding,
+                bindings: script?.binding,
                 exprValues: script?.hasProperty("values_") ? script?.values_ : []
         ]
     }
