@@ -35,3 +35,7 @@ task deploy(type: Copy, dependsOn: jar) {
     into 'lib'
 }
 
+task wrapper (type: Wrapper) {
+    gradleVersion = '1.12'
+}
+

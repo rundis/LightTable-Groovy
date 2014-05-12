@@ -11,6 +11,7 @@ class LTServer {
     final File logFile = new File("lt_groovy.log")
     final Socket ltClient
     final ScriptExecutor scriptExecutor
+    final ClientSessions clientSessions = new ClientSessions()
 
     LTServer(Map params) {
         loggingEnabled = true//params.loggingEnabled
@@ -63,7 +64,9 @@ class LTServer {
     }
 
     private void evalGroovy(data, currentClientId) {
-        def evalResult = scriptExecutor.execute(data.code)
+        def evalResult = scriptExecutor.execute(data.code, clientSessions.get(currentClientId))
+        clientSessions.put(currentClientId, evalResult.bindings)
+
         log "Eval results: $evalResult"
 
         def resultParams = [meta: data.meta]

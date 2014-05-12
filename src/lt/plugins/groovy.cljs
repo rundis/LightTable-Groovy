@@ -16,8 +16,7 @@
             [lt.objs.clients.tcp :as tcp]
             [lt.objs.popup :as popup]
             [lt.objs.eval :as eval]
-            [lt.objs.platform :as platform]
-            [lt.util.cljs :refer [js->clj]])
+            [lt.objs.platform :as platform])
   (:require-macros [lt.macros :refer [behavior]]))
 
 (def shell (load/node-module "shelljs"))

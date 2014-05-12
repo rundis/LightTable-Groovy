@@ -9,6 +9,10 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 class ScriptExecutor {
 
     def execute(String scriptText) {
+        execute(scriptText, [:])
+    }
+
+    def execute(String scriptText, Map bindings) {
 
         def encoding = 'UTF-8'
         def stream = new ByteArrayOutputStream()
@@ -17,7 +21,7 @@ class ScriptExecutor {
         def stacktrace = new StringWriter()
         def errWriter = new PrintWriter(stacktrace)
 
-        def aBinding = new Binding([out: printStream])
+        def aBinding = new Binding(bindings + [out: printStream])
 
         def emcEvents = []
         def listener = { MetaClassRegistryChangeEvent event ->
@@ -61,7 +65,7 @@ class ScriptExecutor {
                 result: result == null ? "" : result.toString(),
                 out: stream.toString(encoding),
                 err: errMsg ? [msg: errMsg, line: errLine] : null,
-                bindings: aBinding,
+                bindings: script.binding,
                 exprValues: script?.hasProperty("values_") ? script?.values_ : []
         ]
     }
@@ -70,6 +74,11 @@ class ScriptExecutor {
         def transform = new ScriptTransform()
         def conf = new CompilerConfiguration()
         conf.addCompilationCustomizers(new ASTTransformationCustomizer(transform))
+
+        // TODO : should be a parameter
+        //conf.setClasspathList(ClassLoader.systemClassLoader.URLs.collect{it.path})
+
+
         new GroovyShell(conf)
     }
 

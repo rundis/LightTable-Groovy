@@ -111,7 +111,7 @@ class CollectSpec extends Specification {
         then:
         script.values_[0].line == 2
         script.values_[0].value.toString().contains("closure")
-        script.values_[1].toString() == [value:16, line:3].toString()
+        script.values_[1] == [value:"16", line:3]
     }
 
 
