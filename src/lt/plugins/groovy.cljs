@@ -190,7 +190,7 @@
 
 (defn notify-of-error [editor res]
   (let [lineNo (+ (-> res :ex :line) (-> res :meta :start) -1)]
-    (object/raise editor :editor.exception (:ex res) {:line lineNo :start-line lineNo'})))
+    (object/raise editor :editor.exception (-> res :ex :msg) {:line lineNo :start-line lineNo'})))
 
 (behavior ::groovy-err
           :triggers #{:groovy.err}
