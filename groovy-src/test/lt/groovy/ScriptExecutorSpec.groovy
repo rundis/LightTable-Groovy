@@ -102,6 +102,42 @@ class ScriptExecutorSpec extends Specification {
         results2.bindings["myDouble"] == 4
     }
 
+    def "run with field annotation, no import required"() {
+        when:
+        def results = executor.execute("""
+            import groovy.transform.Field
+
+            @Field Integer i = 2
+
+            def myMethod() { i + 3 }
+
+            x = myMethod()
+        """)
+
+        then:
+        results.result == "5"
+    }
+
+    def "run with method from previous execution"() {
+        when:
+        def results1 = executor.execute("""
+        def myDouble(val) {val*2}
+        """)
+        def myDouble = results1.bindings["myDouble"]
+
+        def results2 = executor.execute("""
+            myDouble(2)
+        """, [myDouble: myDouble])
+
+        then:
+        results2.result == "4"
+    }
+
+
+
+
+
+
     @Ignore
     def "run with calling stuff set in classpath"() {
         when:

@@ -3,6 +3,7 @@ package lt.groovy
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.MultipleCompilationErrorsException
 import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
+import org.codehaus.groovy.control.customizers.ImportCustomizer
 import org.codehaus.groovy.runtime.StackTraceUtils
 
 
@@ -65,7 +66,7 @@ class ScriptExecutor {
                 result: result == null ? "" : result.toString(),
                 out: stream.toString(encoding),
                 err: errMsg ? [msg: errMsg, line: errLine] : null,
-                bindings: script?.binding,
+                bindings: extractBindingVars(script),
                 exprValues: script?.hasProperty("values_") ? script?.values_ : []
         ]
     }
@@ -75,12 +76,48 @@ class ScriptExecutor {
         def conf = new CompilerConfiguration()
         conf.addCompilationCustomizers(new ASTTransformationCustomizer(transform))
 
+
+        def ic = new ImportCustomizer()
+        ic.addImports("groovy.transform.Field")
+        conf.addCompilationCustomizers(ic)
+
+
         // TODO : should be a parameter
         //conf.setClasspathList(ClassLoader.systemClassLoader.URLs.collect{it.path})
 
 
         new GroovyShell(conf)
     }
+
+
+    private Map extractBindingVars(Script script) {
+        if(!script) return [:]
+
+        Map vars = script.binding.variables.findAll {it.key != "out"} +
+            extractFields(script) +
+            extractMethodsAsClosures(script)
+
+
+        //println vars
+        vars
+    }
+
+    private Map extractFields(Script script) {
+        script.class.declaredFields.findAll { !it.synthetic }.collectEntries {
+            [ (it.name):script."$it.name" ]
+        }
+    }
+
+    private Map extractMethodsAsClosures(Script script) {
+        script.metaClass.methods.findAll {
+            it.declaringClass.name == "Script1" && it.name != "run" && !it.static
+        }.collectEntries {
+            [(it.name):script.&"$it.name"]
+        }
+    }
+
+
+
 
     private Integer findErrLineNum(Throwable t, numLinesInScript) {
         def lineNo = Math.min(t.stackTrace.find{it.lineNumber}?.lineNumber?:numLinesInScript, numLinesInScript)

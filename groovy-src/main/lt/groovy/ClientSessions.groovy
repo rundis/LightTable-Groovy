@@ -5,10 +5,8 @@ class ClientSessions {
     private final Map<Integer, Map> bindingSession = [:]
 
 
-    synchronized put(Integer clientId, Binding binding) {
-        Map variables = binding?.variables?: [:]
-        variables.remove("out")
-        bindingSession.put(clientId, variables)
+    synchronized put(Integer clientId, Map bindingVars) {
+        bindingSession.put(clientId, bindingVars)
     }
 
     synchronized get(Integer clientId) {

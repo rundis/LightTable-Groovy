@@ -70,6 +70,8 @@ class LTServer {
         def evalResult = scriptExecutor.execute(data.code, clientSessions.get(currentClientId))
         clientSessions.put(currentClientId, evalResult.bindings)
 
+        log "Bindings: ${evalResult.bindings}"
+
         log "Eval results: $evalResult"
 
         def resultParams = [meta: data.meta]
