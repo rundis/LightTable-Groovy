@@ -89,16 +89,8 @@ class LTServer {
     }
 
     private List convertToClientVals(List values) {
-//        def safeVal = {
-//            it?.toString()?.contains("closure") ? it.toString() : it == null ? "null" : it.toString()
-//        }
-
         def limitVals = {List vals ->
-            if(vals.size() < 10) {
-                vals
-            } else {
-                vals.take(9) + ["..."] + vals.last()
-            }
+            vals.size() < 10 ? vals : vals.take(9) + [value: "..."] + vals.last()
         }
 
         values.groupBy {it.line}.inject([]) {acc, val ->
