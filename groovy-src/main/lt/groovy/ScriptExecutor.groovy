@@ -9,11 +9,7 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 
 class ScriptExecutor {
 
-    def execute(String scriptText) {
-        execute(scriptText, [:])
-    }
-
-    def execute(String scriptText, Map bindings) {
+    def execute(Map params) {
 
         def encoding = 'UTF-8'
         def stream = new ByteArrayOutputStream()
@@ -22,7 +18,7 @@ class ScriptExecutor {
         def stacktrace = new StringWriter()
         def errWriter = new PrintWriter(stacktrace)
 
-        def aBinding = new Binding(bindings + [out: printStream])
+        def aBinding = new Binding([out: printStream] + (params.bindings ?: [:]))
 
         def emcEvents = []
         def listener = { MetaClassRegistryChangeEvent event ->
@@ -37,12 +33,12 @@ class ScriptExecutor {
         System.setOut(printStream)
         System.setErr(printStream)
 
-        def shell = createShell()
+        def shell = createShell(params)
         def result = ""
-        def errLine = scriptText.readLines().size()
+        def errLine = params.script.readLines().size()
         def script
         try {
-            script = shell.parse(scriptText)
+            script = shell.parse(params.script)
             script.binding = aBinding
             result = script.run()
         } catch (MultipleCompilationErrorsException e) {
@@ -71,20 +67,18 @@ class ScriptExecutor {
         ]
     }
 
-    private GroovyShell createShell() {
+    private GroovyShell createShell(Map params) {
         def transform = new ScriptTransform()
         def conf = new CompilerConfiguration()
         conf.addCompilationCustomizers(new ASTTransformationCustomizer(transform))
-
 
         def ic = new ImportCustomizer()
         ic.addImports("groovy.transform.Field")
         conf.addCompilationCustomizers(ic)
 
-
-        // TODO : should be a parameter
-        //conf.setClasspathList(ClassLoader.systemClassLoader.URLs.collect{it.path})
-
+        if(params.classPathList) {
+            conf.setClasspathList(params.classPathList)
+        }
 
         new GroovyShell(conf)
     }
@@ -93,13 +87,9 @@ class ScriptExecutor {
     private Map extractBindingVars(Script script) {
         if(!script) return [:]
 
-        Map vars = script.binding.variables.findAll {it.key != "out"} +
+        script.binding.variables.findAll {it.key != "out"} +
             extractFields(script) +
             extractMethodsAsClosures(script)
-
-
-        //println vars
-        vars
     }
 
     private Map extractFields(Script script) {

@@ -16,7 +16,9 @@
             [lt.objs.clients.tcp :as tcp]
             [lt.objs.popup :as popup]
             [lt.objs.eval :as eval]
-            [lt.objs.platform :as platform])
+            [lt.objs.platform :as platform]
+            [clojure.string :as string]
+            [lt.util.cljs :refer [->dottedkw str-contains?]])
   (:require-macros [lt.macros :refer [behavior]]))
 
 (def shell (load/node-module "shelljs"))
@@ -69,15 +71,27 @@
 
 
 
+
+(defn escape-spaces [s]
+  (if (= files/separator "\\")
+      (str "\"" s "\"")
+      s))
+
+(defn bash-escape-spaces [s]
+  (clojure.string/replace s " " "\\ "))
+
+
+;;(windows-escape "/Users/mrundberget/Application Support")
+
+
 (defn run-groovy[{:keys [path name client] :as info}]
   (let [obj (object/create ::connecting-notifier info)
-        client-id (clients/->id client)
-        project-dir (files/parent path)]
+        client-id (clients/->id client)]
     (object/merge! client {:port tcp/port
                            :proc obj})
     (notifos/working "Connecting..")
     (proc/exec {:command binary-path
-                :args [tcp/port client-id project-dir]
+                :args [tcp/port client-id (bash-escape-spaces path)]
                 :cwd plugin-dir
                 :env {:LT_GROOVY_LOG (::enable-client-logging? @groovy)}
                 :obj obj})))
@@ -213,6 +227,8 @@
                       (object/merge! groovy {::enable-client-logging? true})))
 
 
+
+
 (object/object* ::groovy-lang
                 :tags #{:groovy.lang})
 
@@ -220,7 +236,7 @@
 (def groovy (object/create ::groovy-lang))
 
 (scl/add-connector {:name "Groovy"
-                    :desc "Select a directory to serve as the root of your groovy project. (Currently not in use!)"
+                    :desc "Select a directory to serve as the root of your groovy project. (Must be a gradle project)"
                     :connect (fn []
                                (dialogs/dir groovy :connect))})
 

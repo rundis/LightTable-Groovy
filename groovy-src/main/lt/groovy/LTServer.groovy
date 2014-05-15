@@ -2,6 +2,8 @@ package lt.groovy
 
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import lt.gradle.ProjectConnection
+import org.codehaus.groovy.runtime.StackTraceUtils
 
 
 class LTServer {
@@ -13,12 +15,15 @@ class LTServer {
     final ScriptExecutor scriptExecutor
     final ClientSessions clientSessions = new ClientSessions()
 
+    ProjectConnection projectConnection
+
     LTServer(Map params) {
-        loggingEnabled = true//params.loggingEnabled
+        loggingEnabled = params.loggingEnabled
         ltPort = params.ltPort
         clientId = params.clientId
         ltClient = params.ltClient
         scriptExecutor = new ScriptExecutor()
+        projectConnection = params.projectConnection
     }
 
     def log(msg) {
@@ -51,13 +56,21 @@ class LTServer {
                             clientSessions.clear(currentClientId)
                             log "Clearing bindings for client: $currentClientId"
                             break;
+                        case "gradle.connect":
+                            connectProject(data)
+                            break;
                         default:
                             log "Invalid command: $command"
                     }
 
                 }
             } catch (Exception e) {
-                log "Error reading from socket inputstream: $e"
+                StackTraceUtils.deepSanitize(e)
+                def stacktrace = new StringWriter()
+                def errWriter = new PrintWriter(stacktrace)
+                e.printStackTrace(errWriter)
+
+                log "Error reading from socket inputstream: ${stacktrace.toString()}"
                 e.printStackTrace()
                 System.exit(1)
             }
@@ -67,10 +80,11 @@ class LTServer {
     }
 
     private void evalGroovy(data, currentClientId) {
-        def evalResult = scriptExecutor.execute(data.code, clientSessions.get(currentClientId))
+        def evalResult = scriptExecutor.execute(
+                script: data.code,
+                bindings: clientSessions.get(currentClientId),
+                classPathList: projectConnection ? projectConnection.classPathList : [])
         clientSessions.put(currentClientId, evalResult.bindings)
-
-        log "Bindings: ${evalResult.bindings}"
 
         log "Eval results: $evalResult"
 
@@ -100,10 +114,28 @@ class LTServer {
         }
     }
 
+    private def connectProject(data, currentClientId) {
+        def retVal = [currentClientId?.id]
+        try {
+            if(projectConnection) {
+                projectConnection.close()
+            }
+            projectConnection = ProjectConnection.connect(new File(data.projectDir))
+            retVal += ["gradle.connected"]
+
+        } catch(Exception e) {
+            log "Error connecting to gradle project: " + e.message
+            retVal += ["gradle.connect.err", [ex: e.message]]
+        }
+
+        sendData(retVal)
+    }
+
     def stop() {
         log "Bye bye !"
         try {
             ltClient.close()
+            projectConnection?.close()
         } catch (Exception e) {
             log "Failed to close client connection, will exit anyway: $e"
         }
@@ -120,7 +152,9 @@ class LTServer {
 
         def ltPort = args[0].toInteger()
         def clientId = args[1].toInteger()
-        def loggingEnabled = System.getenv()["LT_GROOVY_LOG"]?.toBoolean() ?: false
+        def projectDir = args[2]
+        def loggingEnabled = true //System.getenv()["LT_GROOVY_LOG"]?.toBoolean() ?: false
+
 
         def ltClient
         try {
@@ -130,11 +164,17 @@ class LTServer {
             throw e
         }
 
+        ProjectConnection projectConnection = null
+        if(projectDir) {
+            projectConnection = ProjectConnection.connect(new File(sanitizePath(projectDir)))
+        }
+
         def ltServer = new LTServer(
             loggingEnabled: loggingEnabled,
             ltPort: ltPort,
             clientId: clientId,
-            ltClient: ltClient
+            ltClient: ltClient,
+            projectConnection: projectConnection
         )
 
         // notify client
@@ -151,5 +191,14 @@ class LTServer {
         println "Connected" // tells lighttable we're good
 
         ltServer.startRequestHandling()
+    }
+
+
+    private static sanitizePath(String path) {
+        if(File.separator == "/") {
+            path.replaceAll("\\\\ ", " ")
+        } else {
+            path
+        }
     }
 }

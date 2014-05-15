@@ -1,5 +1,17 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:0.8'
+    }
+}
+
+
 apply plugin: 'groovy'
 apply plugin: 'application'
+apply plugin: 'shadow'
+
 
 archivesBaseName = "ltgroovy"
 mainClassName = 'lt.groovy.LTServer'
@@ -9,10 +21,18 @@ repositories {
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.2.0'
+    compile 'org.codehaus.groovy:groovy-all:2.3.0', "org.gradle:gradle-tooling-api:1.12"
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }
 
+
+shadow {
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+    artifactSet {
+        exclude 'org.codehaus.groovy'
+    }
+}
 
 sourceSets {
     main {
@@ -27,12 +47,13 @@ sourceSets {
     }
 }
 
-task deploy(type: Copy, dependsOn: jar) {
+task deploy(type: Copy, dependsOn: shadowJar) {
     //inputs.files jar.archivePath
     //outputs.files
 
-    from jar.archivePath
+    from shadow.shadowJar
     into 'lib'
+    rename "ltgroovy-unspecified-shadow.jar", "ltgroovy.jar"
 }
 
 task wrapper (type: Wrapper) {
