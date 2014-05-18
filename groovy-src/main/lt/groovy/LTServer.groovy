@@ -165,7 +165,7 @@ class LTServer {
         }
 
         ProjectConnection projectConnection = null
-        if(projectDir) {
+        if(projectDir && projectDir.trim() != "null") {
             projectConnection = ProjectConnection.connect(new File(sanitizePath(projectDir)))
         }
 
@@ -183,7 +183,7 @@ class LTServer {
                 name: "Groovy",
                 "client-id": clientId,
                 dir: new File("").absolutePath,
-                commands: ["editor.eval.groovy", "editor.clear.groovy"],
+                commands: ["editor.eval.groovy", "editor.clear.groovy", "gradle.connect"],
                 type: "groovy"
             ]
         )

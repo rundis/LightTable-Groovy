@@ -110,7 +110,9 @@ class ScriptExecutor {
 
 
     private Integer findErrLineNum(Throwable t, numLinesInScript) {
-        def lineNo = Math.min(t.stackTrace.find{it.lineNumber}?.lineNumber?:numLinesInScript, numLinesInScript)
+        def lineNo = Math.min(
+            t.stackTrace.find{it.lineNumber && it.className == "Script1"}?.lineNumber?:numLinesInScript, numLinesInScript)
+
         lineNo > 0 ? lineNo : numLinesInScript
     }
 }

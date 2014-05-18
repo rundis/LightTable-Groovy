@@ -9,4 +9,5 @@
      :files [(:lt.objs.files/file-types
               [{:name "Groovy" :exts [:groovy] :mime "text/x-groovy" :tags [:editor.groovy]}])]
      :groovy.lang [:lt.plugins.groovy/eval!
-                   :lt.plugins.groovy/connect]}}
+                   :lt.plugins.groovy/connect
+                   :lt.plugins.groovy/on-project-provided]}}

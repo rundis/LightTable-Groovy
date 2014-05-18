@@ -17,8 +17,7 @@
             [lt.objs.popup :as popup]
             [lt.objs.eval :as eval]
             [lt.objs.platform :as platform]
-            [clojure.string :as string]
-            [lt.util.cljs :refer [->dottedkw str-contains?]])
+            [clojure.string :as string])
   (:require-macros [lt.macros :refer [behavior]]))
 
 (def shell (load/node-module "shelljs"))
@@ -78,10 +77,9 @@
       s))
 
 (defn bash-escape-spaces [s]
-  (clojure.string/replace s " " "\\ "))
+  (when s (clojure.string/replace s " " "\\ ")))
 
 
-;;(windows-escape "/Users/mrundberget/Application Support")
 
 
 (defn run-groovy[{:keys [path name client] :as info}]
@@ -213,10 +211,19 @@
                       (notify-of-error editor res)))
 
 
+(behavior ::on-project-provided
+          :triggers #{:project.provided}
+          :reaction (fn [this path]
+                      (println (str "Project provided: " path)) ;; todo check if actually a gradle project ?
+                      (object/merge! this {:project-path path})))
+
+
 (behavior ::connect
           :triggers #{:connect}
           :reaction (fn [this path]
+                      (object/raise this :project.provided path)
                       (try-connect {:info {:path path}})))
+
 
 (behavior ::client-enable-logging
           :triggers #{:object.instant}
@@ -225,7 +232,6 @@
           :exclusive true
           :reaction (fn [this]
                       (object/merge! groovy {::enable-client-logging? true})))
-
 
 
 
