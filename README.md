@@ -65,6 +65,7 @@ If you wish to enable debug logging from the groovy client. Add the following to
 Output is written to: ```$groovy-plugin-dir$/lt_groovy.log```
 
 ## Version history
+* 0.0.4 Connect to gradle projects for exploratory testing of any classes in the classpath. Methods are now stored as closure binding variables.
 * 0.0.3 A hint of REPL. Storing binding variables between evals allows for a more REPL like experience.
 * 0.0.2 Inline results for almost any top level line expression yielding values are shown. Removed display of binding variables (no longer needed). The majority of the features for this release are due to awesome groovy ast contributions from [Jim White](https://github.com/jimwhite)
 * 0.0.1 Support for simple syntax highligting and evaluation of groovy scripts with inline results.
