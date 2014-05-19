@@ -86,7 +86,6 @@ class ScriptExecutor {
 
     private Map extractBindingVars(Script script) {
         if(!script) return [:]
-
         script.binding.variables.findAll {it.key != "out"} +
             extractFields(script) +
             extractMethodsAsClosures(script)

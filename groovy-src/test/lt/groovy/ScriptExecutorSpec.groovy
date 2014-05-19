@@ -118,6 +118,7 @@ class ScriptExecutorSpec extends Specification {
         results.result == "5"
     }
 
+
     def "run with method from previous execution"() {
         when:
         def results1 = executor.execute(script: """
@@ -133,18 +134,5 @@ class ScriptExecutorSpec extends Specification {
         results2.result == "4"
     }
 
-    def "run with a class created"() {
-        when:
-        def result1 = executor.execute(script: """
-            class MyClass {
-                String myName
-            }
-
-            a=2
-        """)
-
-        then:
-        result1.err
-    }
 
 }
