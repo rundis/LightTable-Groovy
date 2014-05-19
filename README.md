@@ -50,9 +50,24 @@ myVar = 4
 println myVar // will work fine when evaluating lines separately, because myVar will be stored in binding
 ```
 
+```Groovy
+def myDouble(x) {x*2} // evaluates and results in a closure stored in bindings
+
+myDouble(2) // I can invoke it
+
+myDouble.curry(4)() // Its a closure not a method !
+```
+
 
 If you wish to clear all bindings for an editor invoke the command __Groovy: Clear bindings for current editor__ (you probably would want to assign your own keyboard shortcut for it !)
 
+
+### Gradle integration
+You can connect the groovy plugin to a gradle project (its using the Gradle tooling API under the hood). Just use the command __Add connection__ and select "Groovy" from the list. Then select the directory where your build.gradle file resides.
+```NOTE Won't work on multiprojects```
+
+Once connected you can import and use classes available from the classpath of that project.
+3rd party libraries are available without further ado, but for project internal classes you must explicitly compile your project (and it expects classes to reside in the default location: build/classes/main).
 
 
 
