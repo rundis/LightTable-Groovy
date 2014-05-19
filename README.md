@@ -1,10 +1,11 @@
 ## Groovy plugin for Light Table
-This plugin aims to provide [Groovy](http://groovy.codehaus.org/) suppert for the [Light Table](http://www.lighttable.com) IDE.
-At the moment it is very very rudementary. The short term plan is to grow it into a feasible groovy console/groovy shell alternative with some unique features enabled by the Light Table platform. A long term plan would be to slowly grow it into a feasible Groovy IDE alternative.
+This plugin aims to provide [Groovy](http://groovy.codehaus.org/) support for the [Light Table](http://www.lighttable.com) IDE.
+At the moment it is quite rudementary. The short term plan is to grow it into a feasible groovy console/groovy shell alternative with some unique features enabled by the Light Table platform. A long term plan would be to slowly grow it into a feasible Groovy IDE alternative.
 
-## Installation
+## Installation / Getting started
 
-The plugin is available from the Light Table plugin manager under the name Groovy.
+* The plugin is available from the Light Table plugin manager under the name Groovy.
+* Check out the [screencast](http://bit.ly/ltgrscr)
 
 
 ## Development/Contributing
