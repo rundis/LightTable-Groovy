@@ -1,148 +1,46 @@
 package lt.groovy
 
-import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
+import lt.gradle.ProgressReporter
 import lt.gradle.ProjectConnection
-import org.codehaus.groovy.runtime.StackTraceUtils
-
+import lt.groovy.commands.CommandDispatcher
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class LTServer {
-    final boolean loggingEnabled
-    final Integer ltPort
-    final Integer clientId
-    final File logFile = new File("lt_groovy.log")
-    final Socket ltClient
+    static Logger logger = LoggerFactory.getLogger(LTServer)
+    final LTConnection ltCon
     final ScriptExecutor scriptExecutor
     final ClientSessions clientSessions = new ClientSessions()
 
     ProjectConnection projectConnection
 
     LTServer(Map params) {
-        loggingEnabled = params.loggingEnabled
-        ltPort = params.ltPort
-        clientId = params.clientId
-        ltClient = params.ltClient
+        ltCon = params.ltCon
         scriptExecutor = new ScriptExecutor()
         projectConnection = params.projectConnection
     }
 
-    def log(msg) {
-        if (loggingEnabled) {
-            logFile << "${new Date().format('dd.MM.yyyy HH:mm sss')} - $msg\n"
-        }
-    }
-
-    def sendData(data) {
-        def json = new JsonBuilder(data).toString() + "\n"
-        log "Sending json to LT: $json"
-        ltClient << json
-    }
-
     def startRequestHandling() {
-        ltClient.withStreams { input, output ->
+        def dispatcher = new CommandDispatcher(
+            projectConnection: projectConnection,
+            ltConnection: ltCon,
+            clientSessions: clientSessions
+        )
+
+        ltCon.sock.withStreams { input, output ->
             try {
                 input.eachLine { line ->
-                    log "A command : $line"
-                    def (currentClientId, command, data) = new JsonSlurper().parseText(line)
-
-                    switch (command) {
-                        case "client.close":
-                            stop()
-                            break
-                        case "editor.eval.groovy":
-                            evalGroovy(data, currentClientId)
-                            break
-                        case "editor.clear.groovy":
-                            clientSessions.clear(currentClientId)
-                            log "Clearing bindings for client: $currentClientId"
-                            break;
-                        case "gradle.connect":
-                            connectProject(data)
-                            break;
-                        default:
-                            log "Invalid command: $command"
-                    }
-
+                    logger.info "A command : $line"
+                    dispatcher.dispatch(line)
                 }
             } catch (Exception e) {
-                StackTraceUtils.deepSanitize(e)
-                def stacktrace = new StringWriter()
-                def errWriter = new PrintWriter(stacktrace)
-                e.printStackTrace(errWriter)
-
-                log "Error reading from socket inputstream: ${stacktrace.toString()}"
-                e.printStackTrace()
+                logger.error "Error reading from socket inputstream", e
                 System.exit(1)
             }
         }
 
 
     }
-
-    private void evalGroovy(data, currentClientId) {
-        def evalResult = scriptExecutor.execute(
-                script: data.code,
-                bindings: clientSessions.get(currentClientId),
-                classPathList: projectConnection ? projectConnection.classPathList : [])
-        clientSessions.put(currentClientId, evalResult.bindings)
-
-        log "Eval results: $evalResult"
-
-        def resultParams = [meta: data.meta]
-        if (evalResult.out) {
-            resultParams << [out: evalResult.out]
-        }
-        if(evalResult.exprValues) {
-            resultParams << [result: convertToClientVals(evalResult.exprValues)]
-        }
-
-        if (!evalResult.err) {
-            data = [currentClientId?.toInteger(), "groovy.res", resultParams]
-        } else {
-            data = [currentClientId?.toInteger(), "groovy.err", [ex: evalResult.err] + resultParams]
-        }
-        sendData data
-    }
-
-    private List convertToClientVals(List values) {
-        def limitVals = {List vals ->
-            vals.size() < 10 ? vals : vals.take(9) + [value: "..."] + vals.last()
-        }
-
-        values.groupBy {it.line}.inject([]) {acc, val ->
-            acc + [line: val.key, values: limitVals(val.value).value]
-        }
-    }
-
-    private def connectProject(data, currentClientId) {
-        def retVal = [currentClientId?.id]
-        try {
-            if(projectConnection) {
-                projectConnection.close()
-            }
-            projectConnection = ProjectConnection.connect(new File(data.projectDir))
-            retVal += ["gradle.connected"]
-
-        } catch(Exception e) {
-            log "Error connecting to gradle project: " + e.message
-            retVal += ["gradle.connect.err", [ex: e.message]]
-        }
-
-        sendData(retVal)
-    }
-
-    def stop() {
-        log "Bye bye !"
-        try {
-            ltClient.close()
-            projectConnection?.close()
-        } catch (Exception e) {
-            log "Failed to close client connection, will exit anyway: $e"
-        }
-        System.exit(0)
-    }
-
-
 
     static void main(String[] args) {
         if(!args) {
@@ -153,32 +51,23 @@ class LTServer {
         def ltPort = args[0].toInteger()
         def clientId = args[1].toInteger()
         def projectDir = args[2]
-        def loggingEnabled = true //System.getenv()["LT_GROOVY_LOG"]?.toBoolean() ?: false
 
-
-        def ltClient
-        try {
-            ltClient = new Socket("127.0.0.1", ltPort)
-        } catch (Exception e) {
-            e.printStackTrace()
-            throw e
-        }
+        def ltCon = LTConnection.connect(clientId, ltPort)
 
         ProjectConnection projectConnection = null
         if(projectDir && projectDir.trim() != "null") {
-            projectConnection = ProjectConnection.connect(new File(sanitizePath(projectDir)))
+            projectConnection = ProjectConnection.connect(
+                new File(sanitizePath(projectDir)),
+                new ProgressReporter(ltCon))
         }
 
         def ltServer = new LTServer(
-            loggingEnabled: loggingEnabled,
-            ltPort: ltPort,
-            clientId: clientId,
-            ltClient: ltClient,
+            ltCon: ltCon,
             projectConnection: projectConnection
         )
 
         // notify client
-        ltServer.sendData(
+        ltCon.sendData(
             [
                 name: "Groovy",
                 "client-id": clientId,

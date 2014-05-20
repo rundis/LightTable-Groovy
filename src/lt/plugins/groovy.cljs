@@ -233,6 +233,12 @@
           :reaction (fn [this]
                       (object/merge! groovy {::enable-client-logging? true})))
 
+(behavior ::on-gradle-progress
+          :desc "Reporting of progress from gradle related tasks"
+          :triggers #{:gradle.progress}
+          :reaction (fn [this description]
+                      (println (str "Gradle progress: " description))))
+
 
 
 (object/object* ::groovy-lang

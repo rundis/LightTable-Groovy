@@ -1,14 +1,20 @@
 package lt.gradle
 
 import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.ProgressListener
 import org.gradle.tooling.model.idea.IdeaProject
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Class that wraps interaction with the Gradle Tooling API
  */
 class ProjectConnection {
+    static Logger logger = LoggerFactory.getLogger(ProjectConnection.class)
+
     final org.gradle.tooling.ProjectConnection con
     final File projectDir
+    final ProgressListener listener
 
     IdeaProject project
 
@@ -23,7 +29,10 @@ class ProjectConnection {
     private project() {
         if (!this.project) {
             try {
-                this.project = con.getModel(IdeaProject)
+                logger.info "Retrieving model for project: " + projectDir
+                this.project = con.model(IdeaProject)
+                    .addProgressListener(listener)
+                    .get()
             } catch (Exception e) {
                 throw new RuntimeException("Error getting model for project: " + projectDir, e)
             }
@@ -51,15 +60,21 @@ class ProjectConnection {
     }
 
 
-    private ProjectConnection(org.gradle.tooling.ProjectConnection con, File projectDir) {
+    private ProjectConnection(
+            org.gradle.tooling.ProjectConnection con,
+            File projectDir,
+            ProgressListener progressListener) {
         this.con = con
         this.projectDir = projectDir
+        this.listener = progressListener
     }
 
-    static def connect(File projectDir) {
+    static def connect(File projectDir, ProgressListener progressListener) {
         GradleConnector connector = GradleConnector.newConnector()
                 .forProjectDirectory(projectDir)
         def con = connector.connect();
-        new ProjectConnection(con, projectDir)
+        logger.info "Connected to : " + projectDir
+
+        new ProjectConnection(con, projectDir,progressListener)
     }
 }

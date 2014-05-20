@@ -2,13 +2,18 @@ package lt.gradle
 
 import spock.lang.Specification
 
-
 class ProjectConnectionSpec extends Specification {
-
     ProjectConnection projectCon
+    CollectingProgressListener listener
+
 
     def setup() {
-        projectCon = ProjectConnection.connect(new File("sample"))
+        listener = new CollectingProgressListener()
+        projectCon = ProjectConnection.connect(new File("sample"), listener)
+    }
+
+    def cleanup() {
+        projectCon.close()
     }
 
     def "get runtime classpath list "() {
@@ -20,33 +25,16 @@ class ProjectConnectionSpec extends Specification {
         classPathList[0].contains("groovy-all")
         classPathList[1].contains("groovy-stream")
         classPathList[2].contains("sample/build/classes/main")
-
     }
 
-
-    def "get runtime classpath for non gradle project works as well"() {
-        given:
-        def myCod = ProjectConnection.connect new File("/Users/mrundberget/Library/Application Support/")
-
+    def "check progress listener"() {
         when:
-        println myCod.classPathList
+        projectCon.classPathList
 
         then:
-        1 == 1
+        listener.events
     }
 
 
-    def "path stuff"() {
-        when:
-        def myPath = "/Users/mrundberget/Library/Application\\ Support/LightTable/plugins/Groovy/sample"
 
-        println myPath.replaceAll("\\\\ ", " ")
-
-
-        println new File(myPath).exists()
-        then:
-        1 == 1
-
-
-    }
 }

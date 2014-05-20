@@ -21,7 +21,10 @@ repositories {
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.3.0', "org.gradle:gradle-tooling-api:1.12"
+    compile 'org.codehaus.groovy:groovy-all:2.3.0',
+        "org.gradle:gradle-tooling-api:1.12",
+        "ch.qos.logback:logback-classic:1.1.2",
+        "ch.qos.logback:logback-core:1.1.2"
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }
 
@@ -38,6 +41,9 @@ sourceSets {
     main {
         groovy {
             srcDirs = ["groovy-src/main"]
+        }
+        resources {
+            srcDirs = ["groovy-src/resources"]
         }
     }
     test {

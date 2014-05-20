@@ -5,6 +5,7 @@
                      :lt.plugins.groovy/on-clear-bindings
                      :lt.plugins.groovy/groovy-res
                      :lt.plugins.groovy/groovy-err
+                     :lt.plugins.groovy/on-gradle-progress
                      [:lt.object/add-tag :watchable]]
      :files [(:lt.objs.files/file-types
               [{:name "Groovy" :exts [:groovy] :mime "text/x-groovy" :tags [:editor.groovy]}])]

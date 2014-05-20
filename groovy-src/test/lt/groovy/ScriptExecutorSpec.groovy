@@ -1,8 +1,6 @@
 package lt.groovy
 
-import spock.lang.Ignore
 import spock.lang.Specification
-
 
 class ScriptExecutorSpec extends Specification {
 
@@ -133,6 +131,5 @@ class ScriptExecutorSpec extends Specification {
         then:
         results2.result == "4"
     }
-
 
 }
