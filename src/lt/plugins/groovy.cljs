@@ -236,8 +236,8 @@
 (behavior ::on-gradle-progress
           :desc "Reporting of progress from gradle related tasks"
           :triggers #{:gradle.progress}
-          :reaction (fn [this description]
-                      (println (str "Gradle progress: " description))))
+          :reaction (fn [this info]
+                      (println (str "Gradle progress: " (:msg info)))))
 
 
 
