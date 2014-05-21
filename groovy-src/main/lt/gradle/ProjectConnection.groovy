@@ -1,7 +1,6 @@
 package lt.gradle
 
 import org.gradle.tooling.GradleConnector
-import org.gradle.tooling.ProgressListener
 import org.gradle.tooling.model.idea.IdeaProject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,7 +13,7 @@ class ProjectConnection {
 
     final org.gradle.tooling.ProjectConnection con
     final File projectDir
-    final ProgressListener listener
+    final LTProgressReporter listener
 
     IdeaProject project
 
@@ -30,9 +29,11 @@ class ProjectConnection {
         if (!this.project) {
             try {
                 logger.info "Retrieving model for project: " + projectDir
+                listener.reportProgress("Retrieve gradle model")
                 this.project = con.model(IdeaProject)
                     .addProgressListener(listener)
                     .get()
+                listener.reportProgress("Finished retrieving gradle model")
             } catch (Exception e) {
                 throw new RuntimeException("Error getting model for project: " + projectDir, e)
             }
@@ -63,18 +64,18 @@ class ProjectConnection {
     private ProjectConnection(
             org.gradle.tooling.ProjectConnection con,
             File projectDir,
-            ProgressListener progressListener) {
+            LTProgressReporter progressReporter) {
         this.con = con
         this.projectDir = projectDir
-        this.listener = progressListener
+        this.listener = progressReporter
     }
 
-    static def connect(File projectDir, ProgressListener progressListener) {
+    static def connect(File projectDir, LTProgressReporter progressReporter) {
         GradleConnector connector = GradleConnector.newConnector()
                 .forProjectDirectory(projectDir)
         def con = connector.connect();
         logger.info "Connected to : " + projectDir
 
-        new ProjectConnection(con, projectDir,progressListener)
+        new ProjectConnection(con, projectDir,progressReporter)
     }
 }

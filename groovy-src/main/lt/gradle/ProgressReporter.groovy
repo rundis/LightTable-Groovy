@@ -2,10 +2,8 @@ package lt.gradle
 
 import lt.groovy.LTConnection
 import org.gradle.tooling.ProgressEvent
-import org.gradle.tooling.ProgressListener
 
-
-class ProgressReporter implements ProgressListener {
+class ProgressReporter implements LTProgressReporter {
     final LTConnection ltCon
     Integer clientId
 
@@ -17,13 +15,16 @@ class ProgressReporter implements ProgressListener {
     @Override
     void statusChanged(ProgressEvent event) {
         if (event.description?.trim()) {
-
-            ltCon.sendData([
-                clientId?: ltCon.clientId, //ltCon.clientId,
-                "gradle.progress",
-                [msg: event.description]
-            ])
+            reportProgress(event.description)
         }
+    }
+
+    void reportProgress(String message) {
+        ltCon.sendData([
+            clientId?: ltCon.clientId, //ltCon.clientId,
+            "gradle.progress",
+            [msg: message]
+        ])
     }
 
 }
