@@ -26,6 +26,8 @@
 (def server-path (files/join plugin-dir "lib/ltserver.jar"))
 
 
+
+
 (behavior ::on-out
           :triggers #{:proc.out}
           :reaction (fn [this data]
@@ -237,7 +239,7 @@
           :desc "Reporting of progress from gradle related tasks"
           :triggers #{:gradle.progress}
           :reaction (fn [this info]
-                      (println (str "Gradle progress: " (:msg info)))))
+                      (notifos/msg* (str "Gradle progress: " (:msg info)))))
 
 
 
