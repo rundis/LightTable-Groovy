@@ -6,6 +6,7 @@
 echo $3
 
 GROOVY_BIN=`which groovy`
-GROOVY_ALL_JAR=`find "$GROOVY_BIN/../../embeddable" -type f ! -name "*-indy.jar" | head -n 1`
+GROOVY_BIN_FOLDER=`dirname $GROOVY_BIN`
+GROOVY_ALL_JAR=`find "$GROOVY_BIN_FOLDER/../embeddable" -type f ! -name "*-indy.jar" | head -n 1`
 
 java -cp "$GROOVY_ALL_JAR:lib/ltgroovy.jar" lt.groovy.LTServer $1 $2 "$3"
