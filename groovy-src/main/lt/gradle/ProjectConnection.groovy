@@ -1,6 +1,5 @@
 package lt.gradle
 
-import org.gradle.BuildResult
 import org.gradle.tooling.GradleConnectionException
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ResultHandler
@@ -23,7 +22,7 @@ class ProjectConnection {
     GradleProject gradleProject
 
     List<String> getClassPathList() {
-        getDependencies("COMPILE").file.path + [new File(projectDir, "build/classes/main").path]
+        getDependencies("COMPILE").file + [new File(projectDir, "build/classes/main").path]
     }
 
     List<Map> getTasks() {
@@ -31,6 +30,7 @@ class ProjectConnection {
             [
                 name: it.name,
                 displayName: it.displayName,
+                description: it.description,
                 path: it.path
             ]
         }
@@ -86,7 +86,7 @@ class ProjectConnection {
 
     }
 
-    private List<Map> getDependencies(String scope) {
+    List<Map> getDependencies(String scope) {
         ideaProject()
                 .children
                 .dependencies
@@ -97,9 +97,9 @@ class ProjectConnection {
                     name   : it.gradleModuleVersion?.name,
                     group  : it.gradleModuleVersion?.group,
                     version: it.gradleModuleVersion?.version,
-                    file   : it.file,
-                    source : it.source,
-                    javadoc: it.javadoc
+                    file   : it.file?.path,
+                    source : it.source?.path,
+                    javadoc: it.javadoc?.path
             ]
         }
     }

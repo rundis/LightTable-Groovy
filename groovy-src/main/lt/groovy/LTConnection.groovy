@@ -24,6 +24,7 @@ class LTConnection {
 
     @Synchronized
     void sendData(data) {
+        logger.info "Before json: " + data
         def json = new JsonBuilder(data).toString() + "\n"
         logger.info "Sending data til LT: " + json
         sock << json

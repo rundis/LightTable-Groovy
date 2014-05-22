@@ -3,6 +3,7 @@ package lt.groovy
 import lt.gradle.ProgressReporter
 import lt.gradle.ProjectConnection
 import lt.groovy.commands.CommandDispatcher
+import lt.groovy.commands.ProjectInfoCommand
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -20,11 +21,17 @@ class LTServer {
         projectConnection = params.projectConnection
     }
 
+    def sendProjectInfo() {
+        new ProjectInfoCommand(
+                ltConnection: ltCon,
+                projectConnection: projectConnection).execute()
+    }
+
     def startRequestHandling() {
         def dispatcher = new CommandDispatcher(
-            projectConnection: projectConnection,
-            ltConnection: ltCon,
-            clientSessions: clientSessions
+                projectConnection: projectConnection,
+                ltConnection: ltCon,
+                clientSessions: clientSessions
         )
 
         ltCon.sock.withStreams { input, output ->
@@ -38,12 +45,11 @@ class LTServer {
                 System.exit(1)
             }
         }
-
-
     }
 
     static void main(String[] args) {
-        if(!args) {
+        logger.info "Connecting to server with args: $args"
+        if (!args) {
             println "You must provide port and clientId for lighttable"
             System.exit(1)
         }
@@ -55,36 +61,42 @@ class LTServer {
         def ltCon = LTConnection.connect(clientId, ltPort)
 
         ProjectConnection projectConnection = null
-        if(projectDir && projectDir.trim() != "null") {
+        if (projectDir && projectDir.trim() != "null") {
             projectConnection = ProjectConnection.connect(
-                new File(sanitizePath(projectDir)),
-                new ProgressReporter(ltCon))
+                    new File(sanitizePath(projectDir)),
+                    new ProgressReporter(ltCon))
         }
 
         def ltServer = new LTServer(
-            ltCon: ltCon,
-            projectConnection: projectConnection
+                ltCon: ltCon,
+                projectConnection: projectConnection
         )
 
         // notify client
         ltCon.sendData(
-            [
-                name: "Groovy",
-                "client-id": clientId,
-                dir: new File("").absolutePath,
-                commands: ["editor.eval.groovy", "editor.clear.groovy", "gradle.connect"],
-                type: "groovy"
-            ]
+                [
+                        name       : "Groovy",
+                        "client-id": clientId,
+                        dir        : new File("").absolutePath,
+                        commands   : ["editor.eval.groovy", "editor.clear.groovy", "gradle.connect", "gradle.execute"],
+                        type       : "groovy"
+                ]
         )
 
         println "Connected" // tells lighttable we're good
+
+        if (projectConnection) {
+            ltServer.sendProjectInfo()
+        }
+
+
 
         ltServer.startRequestHandling()
     }
 
 
     private static sanitizePath(String path) {
-        if(File.separator == "/") {
+        if (File.separator == "/") {
             path.replaceAll("\\\\ ", " ")
         } else {
             path

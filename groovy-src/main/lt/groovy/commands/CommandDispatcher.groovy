@@ -18,13 +18,6 @@ class CommandDispatcher {
     void dispatch(String line) {
         def (currentClientId, command, data) = new JsonSlurper().parseText(line)
         def cmd = [execute: {}]
-        Map defaultParams = [
-            ltConnection: ltConnection,
-            projectConnection: projectConnection,
-            currentClientId: currentClientId,
-            clientSessions: clientSessions,
-            data: data
-        ]
 
         switch (command) {
             case "client.close":
@@ -40,10 +33,17 @@ class CommandDispatcher {
             case "editor.clear.groovy":
                 logger.info "Clearing bindings for client: $currentClientId"
                 clientSessions.clear(currentClientId)
-                break;
+                break
             case "gradle.connect":
                 logger.info "Gradle connect command not implemented yet"
-                break;
+                break
+            case "gradle.execute":
+                cmd = new GradleExecuteCommand(
+                        ltConnection: ltConnection,
+                        projectConnection: projectConnection,
+                        params: data
+                )
+                break
             default:
                 logger.warn "Invalid command: $command"
         }

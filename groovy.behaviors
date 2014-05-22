@@ -1,14 +1,15 @@
 {:+ {:app [(:lt.objs.plugins/load-js ["codemirror/groovy.js", "groovy_compiled.js"])]
-     :clients []
+     :clients [:lt.plugins.groovy/on-gradle-progress
+               :lt.plugins.groovy/on-gradle-projectinfo]
      :editor.groovy [:lt.plugins.groovy/on-eval
                      :lt.plugins.groovy/on-eval.one
                      :lt.plugins.groovy/on-clear-bindings
                      :lt.plugins.groovy/groovy-res
                      :lt.plugins.groovy/groovy-err
-                     :lt.plugins.groovy/on-gradle-progress
                      [:lt.object/add-tag :watchable]]
      :files [(:lt.objs.files/file-types
               [{:name "Groovy" :exts [:groovy] :mime "text/x-groovy" :tags [:editor.groovy]}])]
      :groovy.lang [:lt.plugins.groovy/eval!
                    :lt.plugins.groovy/connect
-                   :lt.plugins.groovy/on-project-provided]}}
+                   :lt.plugins.groovy/on-project-provided
+                   :lt.plugins.groovy/on-gradle-execute]}}

@@ -18,11 +18,6 @@ class EvalCommand {
     Object data
 
     void execute() {
-        // ugly hack until I find out how to return results to lighttable to dependent on editor client id
-        if(projectConnection) {
-            projectConnection.listener.clientId = currentClientId
-        }
-
         def evalResult = scriptExecutor.execute(
             script: data.code,
             bindings: clientSessions.get(currentClientId),

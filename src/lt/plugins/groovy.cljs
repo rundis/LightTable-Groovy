@@ -5,6 +5,7 @@
             [lt.objs.proc :as proc]
             [lt.object :as object]
             [lt.objs.sidebar.clients :as scl]
+            [lt.objs.sidebar.command :as scmd]
             [lt.objs.dialogs :as dialogs]
             [lt.objs.console :as console]
             [lt.objs.notifos :as notifos]
@@ -216,7 +217,6 @@
 (behavior ::on-project-provided
           :triggers #{:project.provided}
           :reaction (fn [this path]
-                      (println (str "Project provided: " path)) ;; todo check if actually a gradle project ?
                       (object/merge! this {:project-path path})))
 
 
@@ -242,6 +242,24 @@
                       (notifos/msg* (str "Gradle progress: " (:msg info)))))
 
 
+(behavior ::on-gradle-projectinfo
+          :desc "Gradle project model information"
+          :triggers #{:gradle.projectinfo}
+          :reaction (fn [this info]
+                      (object/merge! groovy {::gradle-project-info info})
+                      (object/assoc-in! cmd/manager [:commands :gradle.task.select :options] (add-selector))))
+
+(behavior ::on-gradle-execute
+          :desc "Gradle execute task(s)"
+          :triggers #{:gradle.execute}
+          :reaction (fn [this task]
+                      (clients/send
+                       (clients/by-name "Groovy")
+                       :gradle.execute
+                       {:tasks [(:name task)]})))
+
+
+;;(clients/send @groovy)
 
 (object/object* ::groovy-lang
                 :tags #{:groovy.lang})
@@ -253,4 +271,39 @@
                     :desc "Select a directory to serve as the root of your groovy project. (Must be a gradle project)"
                     :connect (fn []
                                (dialogs/dir groovy :connect))})
+
+
+
+;; **** Gradle Task Sidebar Selector *****
+(behavior ::set-selected
+          :triggers #{:select}
+          :reaction (fn [this v]
+                      (scmd/exec-active! v)))
+
+(defn selector [opts]
+  (doto (scmd/filter-list opts)
+    (object/add-behavior! ::set-selected)))
+
+
+
+(defn get-tasks []
+  (->@groovy ::gradle-project-info :tasks))
+
+
+
+(defn add-selector []
+  (selector {:items (get-tasks)
+             :key :name
+             :transform #(str "<p>" (:name %4) "</p>"
+                              "<p class='binding'>" (:description %4) "</p>")}))
+
+
+
+(cmd/command {:command :gradle.task.select
+              :desc "Groovy: Select Gradle task"
+              :options (add-selector)
+              :exec (fn [item]
+                      (object/raise groovy :gradle.execute item))})
+
+;; TODO: Clean up upon close connection !
 

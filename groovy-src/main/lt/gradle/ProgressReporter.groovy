@@ -5,8 +5,6 @@ import org.gradle.tooling.ProgressEvent
 
 class ProgressReporter implements LTProgressReporter {
     final LTConnection ltCon
-    Integer clientId
-
 
     ProgressReporter(LTConnection ltCon) {
         this.ltCon = ltCon
@@ -21,7 +19,7 @@ class ProgressReporter implements LTProgressReporter {
 
     void reportProgress(String message) {
         ltCon.sendData([
-            clientId?: ltCon.clientId, //ltCon.clientId,
+            null,
             "gradle.progress",
             [msg: message]
         ])
