@@ -1,6 +1,10 @@
 package lt.gradle
 
+import org.gradle.BuildResult
+import org.gradle.tooling.GradleConnectionException
 import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.ResultHandler
+import org.gradle.tooling.model.GradleProject
 import org.gradle.tooling.model.idea.IdeaProject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -15,22 +19,62 @@ class ProjectConnection {
     final File projectDir
     final LTProgressReporter listener
 
-    IdeaProject project
+    IdeaProject ideaProject
+    GradleProject gradleProject
 
     List<String> getClassPathList() {
         getDependencies("COMPILE").file.path + [new File(projectDir, "build/classes/main").path]
+    }
+
+    List<Map> getTasks() {
+        gradleProject().tasks.collect{
+            [
+                name: it.name,
+                displayName: it.displayName,
+                path: it.path
+            ]
+        }
+    }
+
+    def execute(Map params, Closure onComplete) {
+        def resultHandler = [
+            onComplete: {Object result ->
+                onComplete status: "OK"
+            },
+            onFailure: {GradleConnectionException failure ->
+                onComplete status: "ERROR", error: failure
+            }
+        ] as ResultHandler
+
+
+        con.newBuild()
+            .addProgressListener(listener)
+            .forTasks(params.tasks as String[])
+            .run(resultHandler)
     }
 
     def close() {
         con.close()
     }
 
-    private project() {
-        if (!this.project) {
+    private GradleProject gradleProject() {
+        if(!this.gradleProject) {
+            logger.info "Retrieving gradle model for project: " + projectDir
+            listener.reportProgress("Retrieve gradle model")
+            this.gradleProject = con.model(GradleProject)
+                .addProgressListener(listener)
+                .get()
+            listener.reportProgress("Gradle model retrieved")
+        }
+        this.gradleProject
+    }
+
+    private ideaProject() {
+        if (!this.ideaProject) {
             try {
-                logger.info "Retrieving model for project: " + projectDir
+                logger.info "Retrieving idea model for project: " + projectDir
                 listener.reportProgress("Retrieve gradle model")
-                this.project = con.model(IdeaProject)
+                this.ideaProject = con.model(IdeaProject)
                     .addProgressListener(listener)
                     .get()
                 listener.reportProgress("Finished retrieving gradle model")
@@ -38,12 +82,12 @@ class ProjectConnection {
                 throw new RuntimeException("Error getting model for project: " + projectDir, e)
             }
         }
-        this.project
+        this.ideaProject
 
     }
 
     private List<Map> getDependencies(String scope) {
-        project()
+        ideaProject()
                 .children
                 .dependencies
                 .flatten()

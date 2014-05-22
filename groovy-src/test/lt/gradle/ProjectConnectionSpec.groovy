@@ -1,6 +1,7 @@
 package lt.gradle
 
 import spock.lang.Specification
+import spock.util.concurrent.BlockingVariable
 
 class ProjectConnectionSpec extends Specification {
     ProjectConnection projectCon
@@ -33,6 +34,31 @@ class ProjectConnectionSpec extends Specification {
 
         then:
         listener.events
+    }
+
+    def "get task list"() {
+        when:
+        def tasks = projectCon.tasks
+
+        then:
+        tasks.size() == 23
+        listener.events
+    }
+
+
+    def "execute tasks"() {
+        given:
+        def res = new BlockingVariable<Map>(1000)
+
+        when:
+        projectCon.execute(tasks: ["build"]) { Map result ->
+            res.set result
+        }
+
+
+        then:
+        res.get().status == "OK"
+
     }
 
 
