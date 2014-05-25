@@ -70,6 +70,13 @@ You can connect the groovy plugin to a gradle project (its using the Gradle tool
 Once connected you can import and use classes available from the classpath of that project.
 3rd party libraries are available without further ado, but for project internal classes you must explicitly compile your project (and it expects classes to reside in the default location: build/classes/main).
 
+#### Gradle task execution
+When you have connected to a Gradle project you can invoke tasks (currently only one at a time).
+* Select command: __Groovy: Select gradle task__
+* A list of available tasks is shown
+* Select task
+* The task will be executed and progress shown in the status bar. If there is an error the stacktrace is logged to the console.
+
 
 
 
@@ -81,6 +88,7 @@ If you wish to enable debug logging from the groovy client. Add the following to
 Output is written to: ```$groovy-plugin-dir$/lt_groovy.log```
 
 ## Version history
+* 0.0.5 Execute Gradle tasks for connected gradle project (with progress reporting)
 * 0.0.4 Connect to gradle projects for exploratory testing of any classes in the classpath. Methods are now stored as closure binding variables.
 * 0.0.3 A hint of REPL. Storing binding variables between evals allows for a more REPL like experience.
 * 0.0.2 Inline results for almost any top level line expression yielding values are shown. Removed display of binding variables (no longer needed). The majority of the features for this release are due to awesome groovy ast contributions from [Jim White](https://github.com/jimwhite)
