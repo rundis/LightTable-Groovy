@@ -239,8 +239,28 @@
           :desc "Reporting of progress from gradle related tasks"
           :triggers #{:gradle.progress}
           :reaction (fn [this info]
-                      (notifos/msg* (str "Gradle progress: " (:msg info)))))
+                      (notifos/msg* (str "Gradle progress: " (:msg info)) {:timeout 5000})))
 
+(behavior ::on-gradle-err
+          :desc "Gradle error"
+          :triggers #{:gradle.err}
+          :reaction (fn [this info]
+                      ;;(println (:ex info))
+                      (notifos/set-msg! (str "Gradle failure: " (:message info)) {:class "error" :timeout 5000})
+                      (console/error (str (-> info :ex :cause)))))
+
+(behavior ::on-gradle-execute-err
+          :desc "Error executing gradle task(s)"
+          :triggers #{:gradle.execute.err}
+          :reaction (fn [this info]
+                      (notifos/set-msg! (str "Gradle failure" ) {:class "error" :timeout 5000})
+                      (console/error (pr-str (-> info :error)))))
+
+(behavior ::on-gradle-execute-success
+          :desc "Succesful gradle task(s) execution"
+          :triggers #{:gradle.execute.success}
+          :reaction (fn [this info]
+                      (notifos/msg* (str "Gradle success!" ))))
 
 (behavior ::on-gradle-projectinfo
           :desc "Gradle project model information"
@@ -259,7 +279,9 @@
                        {:tasks [(:name task)]})))
 
 
-;;(clients/send @groovy)
+
+
+
 
 (object/object* ::groovy-lang
                 :tags #{:groovy.lang})

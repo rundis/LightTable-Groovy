@@ -13,11 +13,16 @@ class ProjectInfoCommand {
 
     void execute() {
         logger.info "Retrieving project information"
-        def projectInfo = [
-                dependencies: projectConnection.getDependencies("COMPILE"),
-                tasks: projectConnection.tasks
-        ]
 
-        ltConnection.sendData([null, "gradle.projectinfo", projectInfo])
+        try {
+            def projectInfo = [
+                    dependencies: projectConnection.getDependencies("COMPILE"),
+                    tasks       : projectConnection.tasks
+            ]
+
+            ltConnection.sendData([null, "gradle.projectinfo", projectInfo])
+        } catch (Exception e) {
+            ltConnection.sendData([null, "gradle.err", [message: e.message, ex: e]])
+        }
     }
 }

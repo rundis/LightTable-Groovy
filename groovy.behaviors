@@ -1,6 +1,9 @@
 {:+ {:app [(:lt.objs.plugins/load-js ["codemirror/groovy.js", "groovy_compiled.js"])]
      :clients [:lt.plugins.groovy/on-gradle-progress
-               :lt.plugins.groovy/on-gradle-projectinfo]
+               :lt.plugins.groovy/on-gradle-projectinfo
+               :lt.plugins.groovy/on-gradle-execute-success
+               :lt.plugins.groovy/on-gradle-execute-err
+               :lt.plugins.groovy/on-gradle-err]
      :editor.groovy [:lt.plugins.groovy/on-eval
                      :lt.plugins.groovy/on-eval.one
                      :lt.plugins.groovy/on-clear-bindings

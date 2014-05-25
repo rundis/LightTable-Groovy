@@ -16,9 +16,13 @@ class GradleExecuteCommand {
             if(result.status == "ERROR") {
                 logger.error "Error executing tasks with params: $params", result.failure
             }
-            // TODO: deserves special mention ...
-            // errors should be shown in Light Table etc
-            projectConnection.listener.reportProgress("Gradle task(s) result: " + result.status)
+            ltConnection.sendData([
+                    null,
+                    result.status == "ERROR" ? "gradle.execute.err" : "gradle.execute.success",
+                    result
+            ])
+
+
         }
 
     }
