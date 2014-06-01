@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         jcenter()
+
     }
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:0.8'
@@ -18,13 +19,18 @@ mainClassName = 'lt.groovy.LTServer'
 
 repositories {
     jcenter()
+    maven {
+        url "http://dl.bintray.com/rundis/maven"
+    }
 }
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.3.0',
         "org.gradle:gradle-tooling-api:1.12",
         "ch.qos.logback:logback-classic:1.1.2",
-        "ch.qos.logback:logback-core:1.1.2"
+        "ch.qos.logback:logback-core:1.1.2",
+        "no.rundis.gradle:generic-gradle-model:0.0.1",
+        'cglib:cglib-nodep:2.2.2'
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }
 
@@ -54,9 +60,6 @@ sourceSets {
 }
 
 task deploy(type: Copy, dependsOn: shadowJar) {
-    //inputs.files jar.archivePath
-    //outputs.files
-
     from shadow.shadowJar
     into 'lib'
     rename "ltgroovy-unspecified-shadow.jar", "ltgroovy.jar"
@@ -65,4 +68,3 @@ task deploy(type: Copy, dependsOn: shadowJar) {
 task wrapper (type: Wrapper) {
     gradleVersion = '1.12'
 }
-

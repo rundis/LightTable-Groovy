@@ -1,4 +1,6 @@
-{:+ {:app [(:lt.objs.plugins/load-js ["codemirror/groovy.js", "groovy_compiled.js"])]
+{:+ {:app [(:lt.objs.plugins/load-js ["codemirror/groovy.js" "groovy_compiled.js"])
+           (:lt.objs.plugins/load-css "style/graph.css")]
+
      :clients [:lt.plugins.groovy/on-gradle-progress
                :lt.plugins.groovy/on-gradle-projectinfo
                :lt.plugins.groovy/on-gradle-execute-success
@@ -15,4 +17,6 @@
      :groovy.lang [:lt.plugins.groovy/eval!
                    :lt.plugins.groovy/connect
                    :lt.plugins.groovy/on-project-provided
-                   :lt.plugins.groovy/on-gradle-execute]}}
+                   :lt.plugins.groovy/on-gradle-execute]
+     :graph.dependency [:lt.plugins.groovy.graph/on-close-destroy
+                        :lt.plugins.groovy.graph/on-show-dependencies]}}

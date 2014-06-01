@@ -16,7 +16,7 @@ class ProjectInfoCommand {
 
         try {
             def projectInfo = [
-                    dependencies: projectConnection.getDependencies("COMPILE"),
+                    dependencies: projectConnection.dependencyTree,
                     tasks       : projectConnection.tasks
             ]
 

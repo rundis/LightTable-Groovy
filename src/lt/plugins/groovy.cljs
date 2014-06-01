@@ -18,13 +18,16 @@
             [lt.objs.popup :as popup]
             [lt.objs.eval :as eval]
             [lt.objs.platform :as platform]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [lt.plugins.groovy.graph :as graph])
   (:require-macros [lt.macros :refer [behavior]]))
 
 (def shell (load/node-module "shelljs"))
 (def plugin-dir (plugins/find-plugin "Groovy"))
 (def binary-path (files/join plugin-dir "./run-server.sh"))
 (def server-path (files/join plugin-dir "lib/ltserver.jar"))
+
+
 
 
 
@@ -326,6 +329,14 @@
               :options (add-selector)
               :exec (fn [item]
                       (object/raise groovy :gradle.execute item))})
+
+(cmd/command {:command :gradle.show.deps
+              :desc "Groovy: Shows gradle dependencies"
+              :exec (fn []
+                      (object/raise graph/dependency-graph :graph.show.dependencies (:dependencies (::gradle-project-info @groovy))))})
+
+;;(:dependencies (::gradle-project-info @groovy))
+
 
 ;; TODO: Clean up upon close connection !
 

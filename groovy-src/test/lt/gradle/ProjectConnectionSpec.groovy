@@ -73,10 +73,14 @@ class ProjectConnectionSpec extends Specification {
 
         then:
         str
-
-
     }
 
+    def "get dependency tree"() {
+        when:
+        def tree = projectCon.dependencyTree
 
-
+        then:
+        tree.size() == 7
+        listener.events.size() > 2
+    }
 }
