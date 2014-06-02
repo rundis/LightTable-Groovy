@@ -58,6 +58,19 @@ class ScriptExecutorSpec extends Specification {
         results.err.line == 6
     }
 
+    def "execute class with main method"() {
+        when:
+        def results = executor.execute(script: """
+            class Dummy {
+                static void main(String[] args){
+                }
+            }
+        """)
+
+        then:
+        !results.err
+    }
+
     def "run with simple binding param"() {
         when:
         def bindings = [msg: "Magnus"]
