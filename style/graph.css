@@ -26,3 +26,9 @@ div.dependency-graph {
     stroke-width: 1.5px;
     fill: none;
 }
+
+div.graph-label {
+  padding: 3px;
+  text-align:center;
+  color: var(pane-bg);
+}

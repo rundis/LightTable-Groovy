@@ -85,7 +85,7 @@
   (let [g (new dagreD3/Digraph)]
     (.addNode g "configuration" #js {:label conf-name})
     (doseq [x (unique-deps deps)]
-      (.addNode g (dep-id x) #js {:label (:name x)}))
+      (.addNode g (dep-id x) #js {:label (str "<div class='graph-label' title='" (dep-id x) "'>" (:name x) "<br/>" (:version x) "</div>")}))
     (doseq [x (unique-dep-edges deps)]
       (.addEdge g nil (:a x) (:b x) #js {:label ""}))
     (doseq [x deps]
@@ -99,6 +99,7 @@
 
 (defn d3-sel [selector]
   (.select js/window.d3 selector))
+
 
 (defn on-zoom [d3-layout]
   (let [ev (.-event js/window.d3)]
@@ -148,6 +149,3 @@
 
 ;; TODO: Remember where you put this statement or you are in trouble !
 (def dependency-graph (object/create ::dependency-graph))
-
-
-
