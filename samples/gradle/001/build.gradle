@@ -1,3 +1,10 @@
+/**
+ * 
+ * Simple gradle build file.
+ * Error free. 
+ *
+ */
+
 apply plugin: 'groovy'
 apply plugin: 'project-report'
 

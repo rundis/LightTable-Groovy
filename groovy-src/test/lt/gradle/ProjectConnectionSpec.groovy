@@ -4,6 +4,12 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 import spock.util.concurrent.BlockingVariable
 
+/**
+ * 
+ * Test of basic gradle interface.
+ * Uses gradle sample 001.
+ *
+ */
 class ProjectConnectionSpec extends Specification {
     ProjectConnection projectCon
     CollectingProgressListener listener
