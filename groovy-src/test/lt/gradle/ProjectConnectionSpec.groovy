@@ -11,7 +11,7 @@ class ProjectConnectionSpec extends Specification {
 
     def setup() {
         listener = new CollectingProgressListener()
-        projectCon = ProjectConnection.connect(new File("sample"), listener)
+        projectCon = ProjectConnection.connect(new File("samples/gradle/001"), listener)
     }
 
     def cleanup() {
@@ -26,7 +26,7 @@ class ProjectConnectionSpec extends Specification {
         classPathList.size() == 3
         classPathList[0].contains("groovy-all")
         classPathList[1].contains("groovy-stream")
-        classPathList[2].contains("sample/build/classes/main")
+        classPathList[2].contains("samples/gradle/001/build/classes/main")
     }
 
     def "check progress listener"() {
