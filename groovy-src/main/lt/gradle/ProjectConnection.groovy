@@ -31,7 +31,8 @@ class ProjectConnection {
     }
 
     List<Map> getTasks() {
-        gradleProject().tasks.collect {
+		GradleProject proj = gradleProject()
+        def tasks = proj.tasks.collect {
             [
                     name       : it.name,
                     displayName: it.displayName,
@@ -39,6 +40,17 @@ class ProjectConnection {
                     path       : it.path
             ]
         }
+		for (GradleProject subProj : proj.children) { 
+			subProj.tasks.each {
+				tasks << [
+					name       : it.name,
+					displayName: it.displayName,
+					description: it.description,
+					path       : it.path
+					]
+			}
+		}
+		return tasks
     }
 
     List<Map> getDependencyTree() {
@@ -78,7 +90,7 @@ class ProjectConnection {
         this.gradleProject
     }
 
-    private ideaProject() {
+    private IdeaProject ideaProject() {
         if (!this.ideaProject) {
             try {
                 logger.info "Retrieving idea model for project: " + projectDir
