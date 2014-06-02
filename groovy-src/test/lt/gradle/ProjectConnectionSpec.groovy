@@ -65,6 +65,7 @@ class ProjectConnectionSpec extends Specification {
 
         then:
         res.get().status == "OK"
+		new File("samples/gradle/001/build/classes/main/sample/Dummy.class").exists()
 
     }
 
