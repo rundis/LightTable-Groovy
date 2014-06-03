@@ -1,6 +1,7 @@
 (ns lt.plugins.groovy.graph
   (:require [lt.objs.plugins :as plugins]
             [lt.object :as object]
+            [lt.objs.command :as cmd]
             [lt.objs.tabs :as tabs]
             [lt.util.load :as load]
             [lt.objs.files :as files]
@@ -22,7 +23,11 @@
                 :init (fn [this]
                         (load/js (files/join plugin-dir "js/d3.v3.min.js") :sync)
                         (load/js (files/join plugin-dir "js/dagre-d3.js") :sync)
-                        (dependency-graph-ui this)))
+                        (let [content (dependency-graph-ui this)
+                              ]
+
+
+                          content)))
 
 (behavior ::on-close-destroy
           :triggers #{:close}
@@ -100,10 +105,33 @@
 (defn d3-sel [selector]
   (.select js/window.d3 selector))
 
-
-(defn on-zoom [d3-layout]
+(defn on-zoom2 []
   (let [ev (.-event js/window.d3)]
-    (.attr d3-layout "transform" (str "translate(" (.-translate ev) ") scale(" (.-scale ev) ")"))))
+    (.log js/console (.-translate ev))
+    (.attr
+     (d3-sel (dom/$ :g (:content @dependency-graph)))
+     "transform"
+     (str "translate(" (.-translate ev) ") scale(" (.-scale ev) ")"))))
+
+
+(defn curr-transform [this]
+  (.transform js/window.d3 (.attr (d3-sel (dom/$ :g (:content @this))) "transform")))
+
+(defn curr-scale [this]
+  (first (.-scale (curr-transform this))))
+
+(defn curr-translate [this]
+  (let [t (.-translate (curr-transform this))]
+    {:x (first t) :y (last t)}))
+
+(defn zoom [this delta]
+ (let [s (curr-scale this)
+       t (curr-translate this)
+       svg (d3-sel (dom/$ :svg (:content @this)))]
+   (.scale zoom-listener (+ s delta))
+   (.translate zoom-listener #js [(+ (:x t) delta) (+ (:y t) delta)])
+   (.event zoom-listener (.duration (.transition svg) 500))))
+
 
 (defn deps-by-conf-name [confs name]
   (:dependencies (some #(if (= (:configuration %) name) %) confs)))
@@ -115,8 +143,9 @@
         layout (.run renderer (create-graph (deps-by-conf-name confs conf-name) conf-name) (d3-sel g))
         dim (dimensions this)]
     (.attr (d3-sel svg) "width" (+ (:w dim) 20))
-    (.attr (d3-sel svg) "height" (+ (:h dim) 20))
-    (.call (d3-sel svg) (.on (.zoom (.-behavior js/window.d3)) "zoom" (partial on-zoom (d3-sel g))))))
+    (.attr (d3-sel svg) "height" (+ (:h dim) 20))))
+    ;;(zoom-listener (d3-sel svg))))
+    ;(.call (d3-sel svg) (.on (.zoom (.-behavior js/window.d3)) "zoom" (partial on-zoom (d3-sel g))))))
 
 
 
@@ -146,6 +175,28 @@
                       (when-let [deps (deps-by-conf-name deps-confs "compile")]
                         (render-deps this deps-confs "compile"))))
 
+(cmd/command {:command :graph.zoom-in
+              :desc "Groovy: Zoom in dependency graph"
+              :exec (fn []
+                      (zoom dependency-graph 0.1))})
+
+(cmd/command {:command :graph.zoom-out
+              :desc "Groovy: Zoom out dependency graph"
+              :exec (fn []
+                      (zoom dependency-graph -0.1))})
+
+
 
 ;; TODO: Remember where you put this statement or you are in trouble !
 (def dependency-graph (object/create ::dependency-graph))
+
+;; register zoom listener once ! (move to init perhaps ?)
+(def zoom-listener
+  (.on
+   (.scaleExtent
+    (.zoom (.-behavior js/window.d3))
+    #js [0.1 3])
+   "zoom"
+   on-zoom2))
+
+(zoom-listener (d3-sel (dom/$ :svg (:content @dependency-graph))))
