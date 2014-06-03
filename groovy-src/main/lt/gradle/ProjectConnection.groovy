@@ -46,7 +46,8 @@ class ProjectConnection {
 					name       : it.name,
 					displayName: it.displayName,
 					description: it.description,
-					path       : it.path
+					path       : it.path,
+                    projectName: subProj.name
 					]
 			}
 		}
@@ -117,6 +118,7 @@ class ProjectConnection {
                             .run()
                 listener.reportProgress("Finished retrieving generic gradle model")
             } catch (Exception e) {
+                logger.error "Error getting generic model", e
                 throw new RuntimeException("Error getting generic model for project: " + projectDir, e)
             }
         }

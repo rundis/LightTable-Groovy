@@ -53,6 +53,7 @@ class MultiProjectBuildSpec extends Specification {
 
         then:
         tasks.size() == 48
+        tasks.findAll {it?.projectName == "sub01"}.size() == 24
         listener.events
     }
 
@@ -146,5 +147,15 @@ class MultiProjectBuildSpec extends Specification {
         then:
         tree.size() == 0
         listener.events.size() > 2
+    }
+
+    def "multiple models"() {
+        when:
+        def tasks = projectCon.tasks
+        def tree = projectCon.dependencyTree
+
+        then:
+        tasks
+        tree
     }
 }
