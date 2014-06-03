@@ -4,6 +4,12 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 import spock.util.concurrent.BlockingVariable
 
+/**
+ * 
+ * Test of basic gradle interface.
+ * Uses gradle sample 001.
+ *
+ */
 class ProjectConnectionSpec extends Specification {
     ProjectConnection projectCon
     CollectingProgressListener listener
@@ -11,7 +17,7 @@ class ProjectConnectionSpec extends Specification {
 
     def setup() {
         listener = new CollectingProgressListener()
-        projectCon = ProjectConnection.connect(new File("sample"), listener)
+        projectCon = ProjectConnection.connect(new File("samples/gradle/001"), listener)
     }
 
     def cleanup() {
@@ -26,7 +32,7 @@ class ProjectConnectionSpec extends Specification {
         classPathList.size() == 3
         classPathList[0].contains("groovy-all")
         classPathList[1].contains("groovy-stream")
-        classPathList[2].contains("sample/build/classes/main")
+        classPathList[2].contains("samples/gradle/001/build/classes/main")
     }
 
     def "check progress listener"() {
@@ -59,6 +65,7 @@ class ProjectConnectionSpec extends Specification {
 
         then:
         res.get().status == "OK"
+		new File("samples/gradle/001/build/classes/main/sample/Dummy.class").exists()
 
     }
 
