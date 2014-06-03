@@ -279,7 +279,7 @@
                       (clients/send
                        (clients/by-name "Groovy")
                        :gradle.execute
-                       {:tasks [(:path task)]})))
+                       {:tasks [(:name task)]})))
 
 
 
@@ -319,7 +319,7 @@
 (defn add-selector []
   (selector {:items (get-tasks)
              :key :name
-             :transform #(str "<p>" (:path %4) "</p>"
+             :transform #(str "<p>" (:name %4) "</p>"
                               "<p class='binding'>" (:description %4) "</p>")}))
 
 
