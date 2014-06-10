@@ -1,6 +1,7 @@
 package lt.gradle
 
 import groovy.json.JsonBuilder
+import org.gradle.tooling.model.gradle.BuildInvocations
 import spock.lang.Specification
 import spock.util.concurrent.BlockingVariable
 
@@ -26,18 +27,19 @@ class ProjectConnectionSpec extends Specification {
 
     def "get runtime classpath list "() {
         when:
-        def classPathList = projectCon.classPathList
+        def classPathList = projectCon.runtimeClasspath
 
         then:
-        classPathList.size() == 3
-        classPathList[0].contains("groovy-all")
-        classPathList[1].contains("groovy-stream")
-        classPathList[2].contains("samples/gradle/001/build/classes/main")
+        classPathList.size() == 4
+        classPathList[0].contains("samples/gradle/001/build/classes/main")
+        classPathList[1].contains("samples/gradle/001/build/resources/main")
+        classPathList[2].contains("groovy-all")
+        classPathList[3].contains("groovy-stream")
     }
 
     def "check progress listener"() {
         when:
-        projectCon.classPathList
+        projectCon.runtimeClasspath
 
         then:
         listener.events
@@ -69,25 +71,24 @@ class ProjectConnectionSpec extends Specification {
 
     }
 
-    def "test that project info is jsonifyable"() {
+    def "get root dependencies"() {
         when:
-        def projectInfo = [
-            dependencies: projectCon.getDependencies("COMPILE"),
-            tasks: projectCon.tasks
-        ]
-
-        def str = new JsonBuilder(projectInfo).toString()
+        def rootDeps = projectCon.rootDependencies
 
         then:
-        str
-    }
+        rootDeps.configurations.size() == 7
+        rootDeps.configurations.testRuntime.nodes.size() == 5
 
-    def "get dependency tree"() {
-        when:
-        def tree = projectCon.dependencyTree
-
-        then:
-        tree.size() == 7
         listener.events.size() > 2
     }
+
+    def "single project has no subproject deps"() {
+        when:
+        def subDeps = projectCon.subProjectDependencies
+
+        then:
+        !subDeps
+    }
+
+
 }

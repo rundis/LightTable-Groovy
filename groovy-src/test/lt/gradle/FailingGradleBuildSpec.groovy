@@ -1,9 +1,6 @@
 package lt.gradle
 
-import groovy.json.JsonBuilder
-import org.gradle.tooling.GradleConnectionException
 import spock.lang.Specification
-import spock.util.concurrent.BlockingVariable
 
 /**
  * 
@@ -27,11 +24,11 @@ class FailingGradleBuildSpec extends Specification {
 	
 	def "fail on syntactically incorrect gradle build"() {
 		when:
-			def classPathList = projectCon.classPathList
+			projectCon.runtimeClasspath
 			
 		then:
 		 	RuntimeException e = thrown()
-			e.message =~  /^Error getting model for project:/
+			e.message.contains("Error getting generic model for project:")
 		
 	}
 

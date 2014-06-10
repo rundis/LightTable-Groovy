@@ -7,7 +7,7 @@ import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ResultHandler
 import org.gradle.tooling.model.GradleProject
 import org.gradle.tooling.model.generic.GenericModel
-import org.gradle.tooling.model.idea.IdeaProject
+import org.gradle.tooling.model.gradle.BuildInvocations
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -21,18 +21,22 @@ class ProjectConnection {
     final File projectDir
     final LTProgressReporter listener
 
-    IdeaProject ideaProject
     GradleProject gradleProject
     GenericModel genericModel
 
-
-    List<String> getClassPathList() {
-        getDependencies("COMPILE").file + [new File(projectDir, "build/classes/main").path]
+    List<String> getRuntimeClasspath() {
+        genericModel().classpaths?.main
     }
+
 
     List<Map> getTasks() {
 		GradleProject proj = gradleProject()
-        def tasks = proj.tasks.collect {
+        def tasks = []
+        if(proj.children) {
+            tasks += taskSelectors
+        }
+
+        tasks += proj.tasks.collect {
             [
                     name       : it.name,
                     displayName: it.displayName,
@@ -53,8 +57,23 @@ class ProjectConnection {
 		return tasks
     }
 
-    List<Map> getDependencyTree() {
-        genericModel().dependencies
+    private List<Map> getTaskSelectors() {
+        con.getModel(BuildInvocations).getTaskSelectors().collect {
+            [
+                name: it.name,
+                displayName: it.displayName,
+                description: it.description,
+                path: it.name
+            ]
+        }
+    }
+
+    Map getRootDependencies() {
+        genericModel().rootDependencies
+    }
+
+    List getSubProjectDependencies() {
+        genericModel().subprojectDependencies
     }
 
     def execute(Map params, Closure onComplete) {
@@ -90,22 +109,6 @@ class ProjectConnection {
         this.gradleProject
     }
 
-    private IdeaProject ideaProject() {
-        if (!this.ideaProject) {
-            try {
-                logger.info "Retrieving idea model for project: " + projectDir
-                listener.reportProgress("Retrieve gradle model")
-                this.ideaProject = con.model(IdeaProject)
-                        .addProgressListener(listener)
-                        .get()
-                listener.reportProgress("Finished retrieving gradle model")
-            } catch (Exception e) {
-                throw new RuntimeException("Error getting model for project: " + projectDir, e)
-            }
-        }
-        this.ideaProject
-    }
-
     private GenericModel genericModel() {
         if (!this.genericModel) {
             try {
@@ -122,26 +125,6 @@ class ProjectConnection {
         }
         this.genericModel
     }
-
-
-    List<Map> getDependencies(String scope) {
-        ideaProject()
-                .children
-                .dependencies
-                .flatten()
-                .findAll { it.scope.scope == scope }
-                .collect {
-            [
-                    name   : it.gradleModuleVersion?.name,
-                    group  : it.gradleModuleVersion?.group,
-                    version: it.gradleModuleVersion?.version,
-                    file   : it.file?.path,
-                    source : it.source?.path,
-                    javadoc: it.javadoc?.path
-            ]
-        }
-    }
-
 
     private ProjectConnection(
             org.gradle.tooling.ProjectConnection con,

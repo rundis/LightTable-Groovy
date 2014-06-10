@@ -270,6 +270,7 @@
           :triggers #{:gradle.projectinfo}
           :reaction (fn [this info]
                       (object/merge! groovy {::gradle-project-info info})
+                      (object/raise graph/dependency-graph :graph.set.dependencies (:rootDeps info) (:subProjDeps info))
                       (object/assoc-in! cmd/manager [:commands :gradle.task.select :options] (add-selector))))
 
 (behavior ::on-gradle-execute
@@ -333,9 +334,7 @@
 (cmd/command {:command :gradle.show.deps
               :desc "Groovy: Shows gradle dependencies"
               :exec (fn []
-                      (object/raise graph/dependency-graph :graph.show.dependencies (:dependencies (::gradle-project-info @groovy))))})
-
-;;(:dependencies (::gradle-project-info @groovy))
+                      (object/raise graph/dependency-graph :graph.show.dependencies (:rootDeps (::gradle-project-info @groovy))))})
 
 
 ;; TODO: Clean up upon close connection !

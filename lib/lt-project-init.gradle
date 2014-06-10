@@ -4,7 +4,7 @@ initscript {
             url 'http://dl.bintray.com/rundis/maven'
         }
     }
-    dependencies { classpath "no.rundis.gradle:generic-gradle-model:0.0.1" }
+    dependencies { classpath "no.rundis.gradle:generic-gradle-model:0.0.2" }
 }
 
 allprojects {

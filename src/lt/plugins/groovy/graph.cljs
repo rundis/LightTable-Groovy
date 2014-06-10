@@ -23,10 +23,7 @@
                 :init (fn [this]
                         (load/js (files/join plugin-dir "js/d3.v3.min.js") :sync)
                         (load/js (files/join plugin-dir "js/dagre-d3.js") :sync)
-                        (let [content (dependency-graph-ui this)
-                              ]
-
-
+                        (let [content (dependency-graph-ui this)]
                           content)))
 
 (behavior ::on-close-destroy
@@ -45,57 +42,47 @@
   (clojure.string/join ":" (select-values dep [:name :group :version])))
 
 
-(def sample-deps [
-     {:name "groovy-all" :group "org.codehaus.groovy" :version "2.2.2" :children []}
-     {:name "groovy-stream" :group "com.bloidonia" :version "0.8.1"
-      :children [{:name "groovy-all" :group "org.codehaus.groovy" :version "2.2.2" :children []}]}
-     {:name "spock-core"  :group "org.spockframework"  :version "0.7-groovy-2.0"
-      :children [{:name "groovy-all" :group "org.codehaus.groovy" :version "2.2.2" :children []}
-                 {:name "junit-dep" :group "junit" :version "4.10"
-                  :children [{:name "hamcrest-core" :group "org.hamcrest" :version "1.3" :children []}]}
-                 {:name "junit-dep" :group "junit" :version "4.10" :children []}
-                 {:name "hamcrest-core" :group "org.hamcrest" :version "1.3" :children []}]}])
-
-
-(defn unique-deps [deps]
-  (letfn [(gather-deps [xs]
-            (map #(concat (when (seq (:children %))
-                     (gather-deps (:children %)))
-                            [(dissoc % :children)])
-              xs))]
-    (->>
-     deps
-     (gather-deps)
-     (flatten)
-     (into #{}))))
-
-
-
-(defn unique-dep-edges [deps]
-  (letfn [(gather-edges [xs]
-          (map #(when (seq (:children %))
-                  (concat
-                   (gather-edges (:children %))
-                   (for [x [%]
-                         y (:children %)]
-                     {:a (dep-id x) :b (dep-id y)}))) xs))]
-  (->>
-   deps
-   (gather-edges)
-   (flatten)
-   (remove nil?)
-   (into #{}))))
-
-(defn create-graph [deps conf-name]
-  (let [g (new dagreD3/Digraph)]
-    (.addNode g "configuration" #js {:label conf-name})
-    (doseq [x (unique-deps deps)]
-      (.addNode g (dep-id x) #js {:label (str "<div class='graph-label' title='" (dep-id x) "'>" (:name x) "<br/>" (:version x) "</div>")}))
-    (doseq [x (unique-dep-edges deps)]
-      (.addEdge g nil (:a x) (:b x) #js {:label ""}))
-    (doseq [x deps]
-      (.addEdge g nil "configuration" (dep-id x) #js {:label ""}))
+(defn create-graph [this conf-name & [proj]]
+  (let [g (new dagreD3/Digraph)
+        conf (if proj
+               (get (:configurations (proj-by-name this proj)) (keyword conf-name))
+               (get (-> @this :rootDeps :configurations) (keyword conf-name)))]
+    (.addNode g (name conf-name) #js {:label (name conf-name)})
+    (doseq [x (:nodes conf)]
+      (.addNode g (dep-id x) #js {:label (str "<div class='graph-label "
+                                              (when (= "project" (:type x)) (str " clickable' data-proj-name='"  (:name x)))
+                                              "' title='" (dep-id x) "'>" (:name x) "<br/>" (:version x) "</div>")}))
+    (doseq [x (:edges conf)]
+       (.addEdge g nil (:a x) (:b x) #js {:label ""}))
     g))
+
+
+
+(defn on-select-project [ev]
+  (let [proj (dom/attr (.-target ev) "data-proj-name")]
+    (render-confs dependency-graph proj)
+    (render-deps dependency-graph :compile proj )))
+
+
+(defn bind-select-project [this]
+  (doseq [x (dom/$$ ".graph-label.clickable" (:content @this))]
+    (dom/on x "click" on-select-project)))
+
+(defn unbind-select-project [this]
+  (doseq [x (dom/$$ ".graph-label.clickable" (:content @this))]
+    (dom/off x "click" on-select-project)))
+
+
+
+
+(defn create-multiproject-graph [this]
+  (let [g (new dagreD3/Digraph)]
+    (doseq [x (:nodes (multi-proj-deps this))]
+      (.addNode g (dep-id x) #js {:label (str "<div class='graph-label clickable' data-proj-name='"  (:name x) "' title='" (dep-id x) "'>" (:name x) "<br/>" (:version x) "</div>")}))
+    (doseq [x (:edges (multi-proj-deps this))]
+      (.addEdge g nil (:a x) (:b x) #js {:label ""}))
+    g))
+
 
 
 (defn dimensions [this]
@@ -107,7 +94,6 @@
 
 (defn on-zoom2 []
   (let [ev (.-event js/window.d3)]
-    (.log js/console (.-translate ev))
     (.attr
      (d3-sel (dom/$ :g (:content @dependency-graph)))
      "transform"
@@ -133,47 +119,136 @@
    (.event zoom-listener (.duration (.transition svg) 500))))
 
 
-(defn deps-by-conf-name [confs name]
-  (:dependencies (some #(if (= (:configuration %) name) %) confs)))
-
-(defn render-deps [this confs conf-name]
+(defn render-deps [this conf-name & [proj]]
   (let [renderer (new dagreD3/Renderer)
         g (dom/$ :g (:content @this))
         svg (dom/$ :svg (:content @this))
-        layout (.run renderer (create-graph (deps-by-conf-name confs conf-name) conf-name) (d3-sel g))
+        layout (.run renderer (create-graph this conf-name proj) (d3-sel g))
         dim (dimensions this)]
+    (unbind-select-project this)
+    (bind-select-project this)
     (.attr (d3-sel svg) "width" (+ (:w dim) 20))
     (.attr (d3-sel svg) "height" (+ (:h dim) 20))))
-    ;;(zoom-listener (d3-sel svg))))
-    ;(.call (d3-sel svg) (.on (.zoom (.-behavior js/window.d3)) "zoom" (partial on-zoom (d3-sel g))))))
+
+(defn render-multi-deps [this]
+  (maybe-remove-confs-div this)
+  (render-header-only this)
+  (let [renderer (new dagreD3/Renderer)
+        g (dom/$ :g (:content @this))
+        svg (dom/$ :svg (:content @this))
+        layout (.run renderer (create-multiproject-graph this) (d3-sel g))
+        dim (dimensions this)]
+    (unbind-select-project this)
+    (bind-select-project this)
+    (.attr (d3-sel svg) "width" (+ (:w dim) 20))
+    (.attr (d3-sel svg) "height" (+ (:h dim) 20))))
 
 
 
-(defui conf-ui [this conf confs]
-  [:button (:configuration conf)]
+(defui conf-ui [this conf & [proj]]
+  [:button (key conf)]
    :click (fn [e]
-            (render-deps this confs (:configuration conf))))
+            (render-deps this (key conf) proj)))
 
-(defui confs-ui [this confs]
+(defui header-ui [this & [proj overview]]
+  [:div.graph-header
+   [:h1 [:span.clickable "Dependency graph"]  (str (when overview " - Overview") " - "  (if proj proj (-> @this :rootDeps :name)))]]
+  :click (fn [ev]
+             (default-display this)))
+
+(defui confs-ui [this & [proj]]
   [:div.conf
-   [:h1 "Dependency graph"]
+   (header-ui this proj)
    [:div
-    (map #(conf-ui this % confs) (filter #(seq(:dependencies %)) confs))]])
+    (map
+     #(conf-ui this % proj)
+     (into {} (filter #(seq(:nodes (val %)))
+                      (if proj
+                        (:configurations (proj-by-name this proj))
+                        (-> @this :rootDeps :configurations)))))]])
 
-(defn render-confs [this deps-confs]
+(defn maybe-remove-header-div [this]
+  (when-let [header-div (dom/$ ".graph-header" (:content @this))]
+    (dom/remove header-div)))
+
+
+(defn render-header-only [this & [proj]]
+  (maybe-remove-header-div this)
+  (dom/prepend (:content @this) (header-ui this proj true)))
+
+
+
+(defn maybe-remove-confs-div [this]
   (when-let [conf-div (dom/$ ".conf" (:content @this))]
-    (dom/remove conf-div))
-  (dom/prepend (:content @this) (confs-ui this deps-confs)))
+    (dom/remove conf-div)))
+
+(defn render-confs [this & [proj]]
+  (maybe-remove-header-div this)
+  (maybe-remove-confs-div this)
+  (dom/prepend (:content @this) (confs-ui this proj)))
+
+
+
+(defn project-node [node]
+  (assoc (select-keys node [:name :group :version]) :type "project"))
+
+(defn root-node [this]
+  (project-node (:rootDeps @this)))
+
+(defn sub-nodes [this]
+  (map project-node (:subDeps @this)))
+
+
+
+(defn project-deps-by-conf [x]
+  (filter #(= "project" (:type %)) (:nodes (val x))))
+
+(defn project-deps-by-proj [x]
+  (into #{} (flatten (map #(project-deps-by-conf %) (:configurations x)))))
+
+(defn sub-edges [sub]
+  (map #(hash-map :a (dep-id sub) :b (dep-id %)) (project-deps-by-proj sub)))
+
+(defn subs-edges [this]
+  (flatten (map #(sub-edges %) (:subDeps @this))))
+
+(defn multi-child-edges [this]
+  (map #(hash-map :a (dep-id (root-node this)) :b (dep-id %)) (sub-nodes this)))
+
+(defn multi-proj-deps [this]
+  {:nodes (conj (sub-nodes this) (root-node this))
+   :edges (concat (multi-child-edges this) (subs-edges this))})
+
+
+(defn proj-by-name [this x]
+  (if (= x (-> @this :rootDeps :name))
+    (:rootDeps @this)
+    (some #(if (= x (:name %)) %) (:subDeps @this))))
+
+(defn default-display [this]
+  (when (:rootDeps @this)
+    (if (seq (:subDeps @this))
+      (render-multi-deps this)
+      (do
+        (render-confs this)
+        (when (->@this :rootDeps :configurations :compile)
+          (render-deps this :compile))))))
+
+
+(behavior ::on-dependencies-loaded
+          :desc "Gradle dependencies loaded for selected project"
+          :triggers #{:graph.set.dependencies}
+          :reaction (fn [this rootDeps subDeps]
+                      (object/merge! this {:rootDeps rootDeps
+                                           :subDeps subDeps})))
 
 
 (behavior ::on-show-dependencies
           :desc "Show dependency graph"
           :triggers #{:graph.show.dependencies}
-          :reaction (fn [this deps-confs]
+          :reaction (fn [this root-deps]
                       (tabs/add-or-focus! dependency-graph)
-                      (when deps-confs (render-confs this deps-confs))
-                      (when-let [deps (deps-by-conf-name deps-confs "compile")]
-                        (render-deps this deps-confs "compile"))))
+                      (default-display this)))
 
 (cmd/command {:command :graph.zoom-in
               :desc "Groovy: Zoom in dependency graph"

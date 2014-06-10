@@ -1,0 +1,34 @@
+apply plugin: 'groovy'
+apply plugin: 'project-report'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'org.apache.commons:commons-lang3:3.1'
+    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+}
+
+
+
+task printClassPaths << {
+
+    println "ClassPaths for root"
+    def classPaths = [:]
+    if(project.hasProperty("sourceSets")) {
+        classPaths = project.sourceSets.collectEntries {
+            [it.name, it.runtimeClasspath.files.collect {it.path}]
+        }
+
+
+    }
+
+    println classPaths
+
+
+
+
+
+}
+

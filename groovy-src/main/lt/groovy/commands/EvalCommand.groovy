@@ -21,7 +21,7 @@ class EvalCommand {
         def evalResult = scriptExecutor.execute(
             script: data.code,
             bindings: clientSessions.get(currentClientId),
-            classPathList: projectConnection ? projectConnection.classPathList : [])
+            classPathList: projectConnection ? projectConnection.runtimeClasspath : [])
         clientSessions.put(currentClientId, evalResult.bindings)
 
         logger.info "Eval results: $evalResult"

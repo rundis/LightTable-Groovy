@@ -29,7 +29,7 @@ dependencies {
         "org.gradle:gradle-tooling-api:1.12",
         "ch.qos.logback:logback-classic:1.1.2",
         "ch.qos.logback:logback-core:1.1.2",
-        "no.rundis.gradle:generic-gradle-model:0.0.1",
+        "no.rundis.gradle:generic-gradle-model:0.0.2",
         'cglib:cglib-nodep:2.2.2'
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
 }

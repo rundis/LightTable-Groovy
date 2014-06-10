@@ -16,7 +16,8 @@ class ProjectInfoCommand {
 
         try {
             def projectInfo = [
-                    dependencies: projectConnection.dependencyTree,
+                    rootDeps    : projectConnection.rootDependencies,
+                    subProjDeps : projectConnection.subProjectDependencies,
                     tasks       : projectConnection.tasks
             ]
 
