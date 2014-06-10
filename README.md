@@ -68,14 +68,24 @@ You can connect the groovy plugin to a gradle project (its using the Gradle tool
 ```NOTE Won't work on multiprojects```
 
 Once connected you can import and use classes available from the classpath of that project.
-3rd party libraries are available without further ado, but for project internal classes you must explicitly compile your project (and it expects classes to reside in the default location: build/classes/main).
+3rd party libraries are available without further ado, but for project internal classes you must explicitly compile your project. The plugin uses the runttime classpath available through your projects main sourceSet
 
 #### Gradle task execution
 When you have connected to a Gradle project you can invoke tasks (currently only one at a time).
 * Select command: __Groovy: Select gradle task__
-* A list of available tasks is shown
-* Select task
+* A list of available tasks is shown. For multiprojects task selectors are shown in addition to the individual tasks available for each subproject
+* Select task (or task selector)
 * The task will be executed and progress shown in the status bar. If there is an error the stacktrace is logged to the console.
+
+#### Show dependency graph
+You can view a dependency graph for your connected gradle project via the command __Groovy: Show gradle dependencies__. Each dependency configuration available in your project can be viewed. For multiprojects you also get an overview diagram + the ability to drill down to individual projects. Feature hightlight:
+* Zoom in / out with mouse or keyboard
+* Pan (with mouse only currently)
+* View dependency graph per configuration (tab/button per config)
+* Overview diagram for multiproject (creates edges for any connection between projects regardless of configuration)
+* Any project node (configured as ```project(....)``` dependency in gradle) should be clickable.
+* Clicking on a project dep node should bring you to a detailed view of dependecies for that project
+* If you click the "header" of the diagram you should be taken back to the default view
 
 
 
@@ -88,6 +98,7 @@ If you wish to enable debug logging from the groovy client. Add the following to
 Output is written to: ```$groovy-plugin-dir$/lt_groovy.log```
 
 ## Version history
+* 0.0.6 Gradle dependency graph and execute tasks for gradle multi-projects. Cheers to hackergarten at Gr8Conf for contributions. Big cheers to [effrafax](https://github.com/effrafax) and [rlovtangen](https://github.com/rlovtangen) for contributions to this release !
 * 0.0.5 Execute Gradle tasks for connected gradle project (with progress reporting)
 * 0.0.4 Connect to gradle projects for exploratory testing of any classes in the classpath. Methods are now stored as closure binding variables.
 * 0.0.3 A hint of REPL. Storing binding variables between evals allows for a more REPL like experience.
