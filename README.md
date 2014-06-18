@@ -19,6 +19,8 @@ To build the groovy bits a [Gradle](http://www.gradle.org) wrapper script is pro
   $ ./gradlew build deploy
 ```
 
+Check out the wiki for more details: [Contributing](https://github.com/rundis/LightTable-Groovy/wiki/Contribute)
+
 
 
 ## Requirements
