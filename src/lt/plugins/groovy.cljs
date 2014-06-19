@@ -95,7 +95,7 @@
                            :proc obj})
     (notifos/working "Connecting..")
     (proc/exec {:command binary-path
-                :args [tcp/port client-id (bash-escape-spaces path)]
+                :args [tcp/port client-id (when (files/dir? path)(bash-escape-spaces path))]
                 :cwd plugin-dir
                 :env {:LT_GROOVY_LOG (::enable-client-logging? @groovy)}
                 :obj obj})))
