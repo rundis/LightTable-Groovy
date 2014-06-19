@@ -100,6 +100,7 @@ If you wish to enable debug logging from the groovy client. Add the following to
 Output is written to: ```$groovy-plugin-dir$/lt_groovy.log```
 
 ## Version history
+* 0.0.7 Bugfix regression. Evaluation of .groovy files outside of gradle projects failed
 * 0.0.6 Gradle dependency graph and execute tasks for gradle multi-projects. Cheers to hackergarten at Gr8Conf for contributions. Big cheers to [effrafax](https://github.com/effrafax) and [rlovtangen](https://github.com/rlovtangen) for contributions to this release !
 * 0.0.5 Execute Gradle tasks for connected gradle project (with progress reporting)
 * 0.0.4 Connect to gradle projects for exploratory testing of any classes in the classpath. Methods are now stored as closure binding variables.
