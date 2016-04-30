@@ -1,3 +1,9 @@
+
+# ! NO LONGER MAINTAINED !
+This plugin doesn't work with the latest versions of Light Table and Groovy. If anyone would like to take over maintenance, feel free to get in touch. Alternatively I'm happy to receive pull requests bringing the plugin up to date.
+
+
+
 ## Groovy plugin for Light Table
 This plugin aims to provide [Groovy](http://groovy.codehaus.org/) support for the [Light Table](http://www.lighttable.com) IDE.
 At the moment it is quite rudementary. The short term plan is to grow it into a feasible groovy console/groovy shell alternative with some unique features enabled by the Light Table platform. A long term plan would be to slowly grow it into a feasible Groovy IDE alternative.
